@@ -1,17 +1,19 @@
 from flask import Flask, url_for, request, json, jsonify, render_template
 import flask_login
-
 from flask import redirect
 from flask_sqlalchemy import SQLAlchemy
-
 import datetime
+
+from flask_table import Table, Col
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:zhanghao@localhost/book_store'
 db = SQLAlchemy(app)
 
 
-# DB schemas
+# ***********************************************************************************
+# ------------------------------------DB schemas------------------------------------
+# ***********************************************************************************
 class DB_User(db.Model):
     __tablename__ = 'User'
     username = db.Column('username', db.CHAR(20), primary_key=True)
@@ -73,14 +75,14 @@ class DB_Order_Detail(db.Model):
 
 
 class DB_Shopping_Cart(db.Model):
-    __tablename__="Shopping_Cart"
+    __tablename__ = "Shopping_Cart"
     cart_item_id = db.Column(db.INTEGER, primary_key=True)
     username = db.Column('username', db.ForeignKey('User.username'), )
     ISBN = db.Column('ISBN', db.ForeignKey('Book.ISBN'))
     quantity = db.Column('quantity', db.INTEGER)
 
     def __init__(self, username, ISBN, quantity):
-        self.username=username
+        self.username = username
         self.ISBN = ISBN
         self.quantity = quantity
 
@@ -88,21 +90,9 @@ class DB_Shopping_Cart(db.Model):
 db.create_all()
 db.session.commit()
 
-# order_1 = DB_Order('zhanghao',datetime.date.today(),'shipped')
-# db.session.add(order_1)
-# db.session.commit()
-#
-# detail_1 = DB_Order_Detail(order_1.order_id,'978-873625125',6)
-# detail_2 = DB_Order_Detail(order_1.order_id,'978-873625125',7)
-# db.session.add(detail_1)
-# db.session.add(detail_2)
-# db.session.commit()
-
-# Example delete
-# delete_this = DB_User.query.filter_by(username='zhanghao').first()
-# db.session.delete(delete_this)
-# db.session.commit()
-
+# ***********************************************************************************
+# ------------------------------------Login Manager----------------------------------
+# ***********************************************************************************
 
 app.secret_key = 'super secret string'  # todo Change this
 
@@ -143,6 +133,46 @@ def user_loader(username):
 @login_manager.unauthorized_handler
 def unauthorized_handler():
     return 'Unauthorized'
+
+
+# ***********************************************************************************
+# ------------------------------------Flask Table------------------------------------
+# ***********************************************************************************
+
+
+# Declare your table
+class ItemTable(Table):
+    name = Col('Name')
+    description = Col('Description')
+
+
+# Get some objects
+class Item(object):
+    def __init__(self, name, description):
+        self.name = name
+        self.description = description
+
+
+# items = [Item('Name1', 'Description1'),
+#          Item('Name2', 'Description2'),
+#          Item('Name3', 'Description3')]
+#
+# # Populate the table
+# table = ItemTable(items)
+#
+# # Print the html
+# print(table.__html__())
+
+
+# or just {{ table }} from within a Jinja template
+
+
+
+
+# ***********************************************************************************
+# ------------------------------------Flask------------------------------------------
+# ***********************************************************************************
+
 
 
 @app.route('/')
@@ -194,6 +224,21 @@ def signup():
     return 'Bad Sign Up'
 
 
+@app.route('/profile')
+@flask_login.login_required
+def profile():
+    db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
+    account_info = [Item('Username', db_user.username),
+                    Item('Credit Card', db_user.credit_card),
+                    Item('Address', db_user.address),
+                    Item('Phone', db_user.phone)]
+
+    account_info_table = ItemTable(account_info)
+    print(account_info_table.__html__())
+
+    return render_template('profile.html', account_info_table=account_info_table)
+
+
 @app.route('/protected')
 @flask_login.login_required
 def protected():
@@ -216,4 +261,4 @@ def logout():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')
