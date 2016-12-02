@@ -72,6 +72,19 @@ class DB_Order_Detail(db.Model):
         self.quantity = quantity
 
 
+class DB_Shopping_Cart(db.Model):
+    __tablename__="Shopping_Cart"
+    cart_item_id = db.Column(db.INTEGER, primary_key=True)
+    username = db.Column('username', db.ForeignKey('User.username'), )
+    ISBN = db.Column('ISBN', db.ForeignKey('Book.ISBN'))
+    quantity = db.Column('quantity', db.INTEGER)
+
+    def __init__(self, username, ISBN, quantity):
+        self.username=username
+        self.ISBN = ISBN
+        self.quantity = quantity
+
+
 db.create_all()
 db.session.commit()
 
