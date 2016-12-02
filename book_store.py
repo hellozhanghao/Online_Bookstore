@@ -43,14 +43,6 @@ class DB_Book(db.Model):
 db.create_all()
 db.session.commit()
 
-# some_user = DB_User('zhanghao','password','34523423432','345345kasfjsd RD','435346545')
-# db.session.add(some_user)
-# db.session.commit()
-
-user1 = DB_User.query.filter_by(username='zhanghao2').first()
-
-
-
 # Example insert
 # user=DB_User('someone','password')
 # db.session.add(user)
@@ -110,37 +102,36 @@ app.secret_key = 'super secret string'  # todo Change this
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 
-users = {'test': {'pw': 'password'}}
-
 
 class User(flask_login.UserMixin):
     pass
 
 
 @login_manager.user_loader
-def user_loader(email):
-    if email not in users:
+def user_loader(username):
+    db_user = DB_User.query.filter_by(username=username).first()
+    if db_user is None:
         return
-
     user = User()
-    user.id = email
+    user.id = username
     return user
 
 
-@login_manager.request_loader
-def request_loader(request):
-    email = request.form.get('email')
-    if email not in users:
-        return
-
-    user = User()
-    user.id = email
-
-    # DO NOT ever store passwords in plaintext and always compare password
-    # hashes using constant-time comparison!
-    user.is_authenticated = request.form['pw'] == users[email]['pw']
-
-    return user
+# @login_manager.request_loader
+# def request_loader(request):
+#     print("call")
+#     email = request.form.get('email')
+#     if email not in users:
+#         return
+#
+#     user = User()
+#     user.id = email
+#
+#     # DO NOT ever store passwords in plaintext and always compare password
+#     # hashes using constant-time comparison!
+#     user.is_authenticated = request.form['pw'] == users[email]['pw']
+#
+#     return user
 
 @login_manager.unauthorized_handler
 def unauthorized_handler():
@@ -160,7 +151,13 @@ def login():
 
     if request.method == 'POST':
         username = request.form['username']
-
+        db_user=DB_User.query.filter_by(username=username).first()
+        if db_user is not None:
+            if request.form['password'] == db_user.password:
+                user = User()
+                user.id = username
+                flask_login.login_user(user)
+                return redirect(url_for('protected'))
 
     # email = request.form['username']
     # if request.form['password'] == users[email]['pw']:
@@ -183,12 +180,6 @@ def logout():
     flask_login.logout_user()
     return 'Logged out'
 
-
-
-
-@app.route('/debug')
-def debug():
-    return str(users)
 
 
 if __name__ == '__main__':
