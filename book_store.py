@@ -15,29 +15,29 @@ class DB_User(db.Model):
     username = db.Column('username', db.CHAR(20), primary_key=True)
     password = db.Column('password', db.CHAR(20))
     credit_card = db.Column('credit_card', db.CHAR(20))
-    address = db.Column('address',db.CHAR(20))
-    phone = db.Column('phone',db.CHAR(20))
+    address = db.Column('address', db.CHAR(20))
+    phone = db.Column('phone', db.CHAR(20))
 
-    def __init__(self, username, password,credit_card,address,phone):
+    def __init__(self, username, password, credit_card, address, phone):
         self.username = username
         self.password = password
-        self.credit_card=credit_card
+        self.credit_card = credit_card
         self.address = address
         self.phone = phone
 
 
 class DB_Book(db.Model):
     __tablename__ = "Book"
-    ISBN = db.Column('ISBN', db.CHAR(14) ,primary_key= True)
+    ISBN = db.Column('ISBN', db.CHAR(14), primary_key=True)
     title = db.Column('title', db.CHAR(40))
     author = db.Column('author', db.CHAR(40))
     publisher = db.Column('publisher', db.CHAR(40))
     year = db.Column('year', db.INTEGER)
     copy = db.Column('copy', db.INTEGER)
     price = db.Column('price', db.FLOAT)
-    format = db.Column ('format', db.CHAR(20))
-    subject = db.Column ('subject', db.CHAR(20))
-    keywords = db.Column ('keywords', db.CHAR(100))
+    format = db.Column('format', db.CHAR(20))
+    subject = db.Column('subject', db.CHAR(20))
+    keywords = db.Column('keywords', db.CHAR(100))
 
 
 db.create_all()
@@ -141,7 +141,6 @@ def unauthorized_handler():
 @app.route('/')
 def index():
     return redirect(url_for('login'))
-    # return render_template('index.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -151,7 +150,7 @@ def login():
 
     if request.method == 'POST':
         username = request.form['username']
-        db_user=DB_User.query.filter_by(username=username).first()
+        db_user = DB_User.query.filter_by(username=username).first()
         if db_user is not None:
             if request.form['password'] == db_user.password:
                 user = User()
@@ -159,14 +158,28 @@ def login():
                 flask_login.login_user(user)
                 return redirect(url_for('protected'))
 
-    # email = request.form['username']
-    # if request.form['password'] == users[email]['pw']:
-    #     user = User()
-    #     user.id = email
-    #     flask_login.login_user(user)
-    #     return redirect(url_for('protected'))
-
     return 'Bad login'
+
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'GET':
+        return render_template('signup.html')
+
+    if request.method == 'POST':
+        username = request.form['username']
+        db_user = DB_User.query.filter_by(username=username).first()
+        if db_user is None:
+            new_user = DB_User(username,
+                               request.form['password'],
+                               request.form['credit_card'],
+                               request.form['address'],
+                               request.form['phone'])
+            db.session.add(new_user)
+            db.session.commit()
+            return redirect(url_for('login'))
+
+    return 'Bad Sign Up'
 
 
 @app.route('/protected')
@@ -179,7 +192,6 @@ def protected():
 def logout():
     flask_login.logout_user()
     return 'Logged out'
-
 
 
 if __name__ == '__main__':
