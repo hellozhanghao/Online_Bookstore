@@ -132,7 +132,7 @@ def user_loader(username):
 
 @login_manager.unauthorized_handler
 def unauthorized_handler():
-    return 'Unauthorized'
+    return redirect(url_for('login'))
 
 
 # ***********************************************************************************
@@ -152,21 +152,20 @@ class Item(object):
         self.name = name
         self.description = description
 
+class OrderTable(Table):
+    order_id = Col('Order ID')
+    date = Col('Date Ordered')
+    status = Col('Order Status')
+    book = Col('Book Name')
+    qty = Col('Quantity')
 
-# items = [Item('Name1', 'Description1'),
-#          Item('Name2', 'Description2'),
-#          Item('Name3', 'Description3')]
-#
-# # Populate the table
-# table = ItemTable(items)
-#
-# # Print the html
-# print(table.__html__())
-
-
-# or just {{ table }} from within a Jinja template
-
-
+class OrderItem(object):
+    def __init__(self, order_id, date, status, book, qty):
+        self.order_id=order_id
+        self.date=date
+        self.status=status
+        self.book=book
+        self.qty=qty
 
 
 # ***********************************************************************************
@@ -176,6 +175,7 @@ class Item(object):
 
 
 @app.route('/')
+@flask_login.login_required
 def index():
     return redirect(url_for('login'))
 
@@ -227,6 +227,8 @@ def signup():
 @app.route('/profile')
 @flask_login.login_required
 def profile():
+
+    # Account Info
     db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
     account_info = [Item('Username', db_user.username),
                     Item('Credit Card', db_user.credit_card),
@@ -234,9 +236,33 @@ def profile():
                     Item('Phone', db_user.phone)]
 
     account_info_table = ItemTable(account_info)
-    print(account_info_table.__html__())
 
-    return render_template('profile.html', account_info_table=account_info_table)
+    # Order Details
+    order_info=[]
+    orders = DB_Order.query.filter_by(username=flask_login.current_user.id).all()
+    for order in orders:
+        books = DB_Order_Detail.query.filter_by(order_id=order.order_id).all()
+        entry=0
+        for book in books:
+            order_id = order.order_id
+            date = order.date
+            status = order.status
+            book_record = DB_Book.query.filter_by(ISBN=book.ISBN).first()
+            bookname = book_record.title
+            qty= book.quantity
+            if entry==0:
+                order_info.append(OrderItem(order_id,date,status,bookname,qty))
+            else:
+                order_info.append(OrderItem('','','',bookname,qty))
+            entry += 1
+
+
+    order_info_table = OrderTable(order_info)
+
+
+    return render_template('profile.html',
+                           account_info_table=account_info_table,
+                           order_info_table=order_info_table)
 
 
 @app.route('/protected')
