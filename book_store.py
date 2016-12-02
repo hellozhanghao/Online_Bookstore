@@ -139,18 +139,16 @@ def unauthorized_handler():
 # ------------------------------------Flask Table------------------------------------
 # ***********************************************************************************
 
-
-# Declare your table
 class ItemTable(Table):
     name = Col('Name')
     description = Col('Description')
 
 
-# Get some objects
 class Item(object):
     def __init__(self, name, description):
         self.name = name
         self.description = description
+
 
 class OrderTable(Table):
     order_id = Col('Order ID')
@@ -159,13 +157,14 @@ class OrderTable(Table):
     book = Col('Book Name')
     qty = Col('Quantity')
 
+
 class OrderItem(object):
     def __init__(self, order_id, date, status, book, qty):
-        self.order_id=order_id
-        self.date=date
-        self.status=status
-        self.book=book
-        self.qty=qty
+        self.order_id = order_id
+        self.date = date
+        self.status = status
+        self.book = book
+        self.qty = qty
 
 
 # ***********************************************************************************
@@ -223,11 +222,15 @@ def signup():
 
     return 'Bad Sign Up'
 
+@app.route('/logout')
+def logout():
+    flask_login.logout_user()
+    return 'Logged out'
+
 
 @app.route('/profile')
 @flask_login.login_required
 def profile():
-
     # Account Info
     db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
     account_info = [Item('Username', db_user.username),
@@ -238,27 +241,25 @@ def profile():
     account_info_table = ItemTable(account_info)
 
     # Order Details
-    order_info=[]
+    order_info = []
     orders = DB_Order.query.filter_by(username=flask_login.current_user.id).all()
     for order in orders:
         books = DB_Order_Detail.query.filter_by(order_id=order.order_id).all()
-        entry=0
+        entry = 0
         for book in books:
             order_id = order.order_id
             date = order.date
             status = order.status
             book_record = DB_Book.query.filter_by(ISBN=book.ISBN).first()
             bookname = book_record.title
-            qty= book.quantity
-            if entry==0:
-                order_info.append(OrderItem(order_id,date,status,bookname,qty))
+            qty = book.quantity
+            if entry == 0:
+                order_info.append(OrderItem(order_id, date, status, bookname, qty))
             else:
-                order_info.append(OrderItem('','','',bookname,qty))
+                order_info.append(OrderItem('', '', '', bookname, qty))
             entry += 1
 
-
     order_info_table = OrderTable(order_info)
-
 
     return render_template('profile.html',
                            account_info_table=account_info_table,
@@ -280,10 +281,7 @@ def admin():
     return "Access denied! Only admin can view this page"
 
 
-@app.route('/logout')
-def logout():
-    flask_login.logout_user()
-    return 'Logged out'
+
 
 
 if __name__ == '__main__':
