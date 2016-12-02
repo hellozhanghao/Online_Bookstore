@@ -1,4 +1,4 @@
-from flask import Flask, url_for, request, json, jsonify
+from flask import Flask, url_for, request, json, jsonify, render_template
 import flask_login
 
 from flask import redirect
@@ -13,7 +13,7 @@ db = SQLAlchemy(app)
 class DB_User(db.Model):
     __tablename__ = 'User'
     username = db.Column('username', db.CHAR(20), primary_key=True)
-    password = db.Column('password', db.CHAR(20), primary_key=True)
+    password = db.Column('password', db.CHAR(20))
     credit_card = db.Column('credit_card', db.CHAR(20))
     address = db.Column('address',db.CHAR(20))
     phone = db.Column('phone',db.CHAR(20))
@@ -26,17 +26,28 @@ class DB_User(db.Model):
         self.phone = phone
 
 
+class DB_Book(db.Model):
+    __tablename__ = "Book"
+    ISBN = db.Column('ISBN', db.CHAR(14) ,primary_key= True)
+    title = db.Column('title', db.CHAR(40))
+    author = db.Column('author', db.CHAR(40))
+    publisher = db.Column('publisher', db.CHAR(40))
+    year = db.Column('year', db.INTEGER)
+    copy = db.Column('copy', db.INTEGER)
+    price = db.Column('price', db.FLOAT)
+    format = db.Column ('format', db.CHAR(20))
+    subject = db.Column ('subject', db.CHAR(20))
+    keywords = db.Column ('keywords', db.CHAR(100))
 
 
-# db.create_all()
-# db.session.commit()
-#
+db.create_all()
+db.session.commit()
+
 # some_user = DB_User('zhanghao','password','34523423432','345345kasfjsd RD','435346545')
 # db.session.add(some_user)
 # db.session.commit()
 
-user1 = DB_User.query.filter_by(username='zhanghao',password='password').first()
-print(user1.username)
+user1 = DB_User.query.filter_by(username='zhanghao2').first()
 
 
 
@@ -94,17 +105,6 @@ print(user1.username)
 #
 #
 
-
-
-
-
-
-
-
-
-
-
-
 app.secret_key = 'super secret string'  # todo Change this
 
 login_manager = flask_login.LoginManager()
@@ -142,6 +142,10 @@ def request_loader(request):
 
     return user
 
+@login_manager.unauthorized_handler
+def unauthorized_handler():
+    return 'Unauthorized'
+
 
 @app.route('/')
 def index():
@@ -152,20 +156,18 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
-        return '''
-               <form action='login' method='POST'>
-                <input type='text' name='email' id='email' placeholder='email'></input>
-                <input type='password' name='pw' id='pw' placeholder='password'></input>
-                <input type='submit' name='submit'></input>
-               </form>
-               '''
+        return render_template('login.html')
 
-    email = request.form['email']
-    if request.form['pw'] == users[email]['pw']:
-        user = User()
-        user.id = email
-        flask_login.login_user(user)
-        return redirect(url_for('protected'))
+    if request.method == 'POST':
+        username = request.form['username']
+
+
+    # email = request.form['username']
+    # if request.form['password'] == users[email]['pw']:
+    #     user = User()
+    #     user.id = email
+    #     flask_login.login_user(user)
+    #     return redirect(url_for('protected'))
 
     return 'Bad login'
 
@@ -182,9 +184,6 @@ def logout():
     return 'Logged out'
 
 
-@login_manager.unauthorized_handler
-def unauthorized_handler():
-    return 'Unauthorized'
 
 
 @app.route('/debug')
