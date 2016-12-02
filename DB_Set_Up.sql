@@ -11,8 +11,12 @@ insert into User values('foo','bar');
 
 select * from User;
 
-select * from pet;
-
-select * from person;
 
 DROP TABLE `book_store`.`User`;
+
+
+insert into Book values('978-873625125','Harry Potter','zhanghao','SUTD Press','2016',4,25.65,'paperback','novel','key1 key2 key3');
+insert into User values('admin','adminpass','credit_card','add','34534',true)
+
+
+select * from Book;

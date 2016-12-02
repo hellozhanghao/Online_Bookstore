@@ -17,14 +17,15 @@ class DB_User(db.Model):
     credit_card = db.Column('credit_card', db.CHAR(20))
     address = db.Column('address', db.CHAR(20))
     phone = db.Column('phone', db.CHAR(20))
+    admin = db.Column('admin', db.BOOLEAN)
 
-    def __init__(self, username, password, credit_card, address, phone):
+    def __init__(self, username, password, credit_card, address, phone, admin):
         self.username = username
         self.password = password
         self.credit_card = credit_card
         self.address = address
         self.phone = phone
-
+        self.admin = admin
 
 class DB_Book(db.Model):
     __tablename__ = "Book"
@@ -42,6 +43,11 @@ class DB_Book(db.Model):
 
 db.create_all()
 db.session.commit()
+
+user= DB_User.query.filter_by(username='zhanghao').first()
+print(user.admin)
+
+
 
 # Example insert
 # user=DB_User('someone','password')
@@ -174,10 +180,15 @@ def signup():
                                request.form['password'],
                                request.form['credit_card'],
                                request.form['address'],
-                               request.form['phone'])
+                               request.form['phone'],
+                               False)
             db.session.add(new_user)
             db.session.commit()
-            return redirect(url_for('login'))
+
+            user = User()
+            user.id = username
+            flask_login.login_user(user)
+            return redirect(url_for('protected'))
 
     return 'Bad Sign Up'
 
@@ -188,6 +199,14 @@ def protected():
     return 'Logged in as: ' + flask_login.current_user.id
 
 
+@app.route('/admin')
+@flask_login.login_required
+def admin():
+    db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
+    if db_user.admin:
+        return "Welcome admin! Logged in as " + flask_login.current_user.id
+    return "Access denied! Only admin can view this page"
+
 @app.route('/logout')
 def logout():
     flask_login.logout_user()
@@ -195,4 +214,4 @@ def logout():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')
