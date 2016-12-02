@@ -4,6 +4,8 @@ import flask_login
 from flask import redirect
 from flask_sqlalchemy import SQLAlchemy
 
+import datetime
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:zhanghao@localhost/book_store'
 db = SQLAlchemy(app)
@@ -27,6 +29,7 @@ class DB_User(db.Model):
         self.phone = phone
         self.admin = admin
 
+
 class DB_Book(db.Model):
     __tablename__ = "Book"
     ISBN = db.Column('ISBN', db.CHAR(14), primary_key=True)
@@ -41,22 +44,45 @@ class DB_Book(db.Model):
     keywords = db.Column('keywords', db.CHAR(100))
 
 
+class DB_Order(db.Model):
+    __tablename__ = 'Orders'
+    order_id = db.Column('order_id', db.INTEGER, primary_key=True)
+    username = db.Column('username', db.ForeignKey('User.username'), )
+    date = db.Column('date', db.DATE)
+    status = db.Column('status', db.CHAR(30))
+
+    # orders = db.relationship('DB_Order_Detail', backref='user', lazy='dynamic')
+
+    def __init__(self, username, date, status):
+        self.username = username
+        self.date = date
+        self.status = status
+
+
+class DB_Order_Detail(db.Model):
+    __tablename__ = "Order_Detail"
+    order_detail_id = db.Column(db.INTEGER, primary_key=True)
+    order_id = db.Column('order_id', db.ForeignKey('Orders.order_id'))
+    ISBN = db.Column('ISBN', db.ForeignKey('Book.ISBN'))
+    quantity = db.Column('quantity', db.INTEGER)
+
+    def __init__(self, order_id, ISBN, quantity):
+        self.order_id = order_id
+        self.ISBN = ISBN
+        self.quantity = quantity
+
+
 db.create_all()
 db.session.commit()
 
-user= DB_User.query.filter_by(username='zhanghao').first()
-print(user.admin)
-
-
-
-# Example insert
-# user=DB_User('someone','password')
-# db.session.add(user)
+# order_1 = DB_Order('zhanghao',datetime.date.today(),'shipped')
+# db.session.add(order_1)
 # db.session.commit()
-
-# Example update
-# update_this = DB_User.query.filter_by(username='zhanghao').first()
-# update_this.password = 'updated'
+#
+# detail_1 = DB_Order_Detail(order_1.order_id,'978-873625125',6)
+# detail_2 = DB_Order_Detail(order_1.order_id,'978-873625125',7)
+# db.session.add(detail_1)
+# db.session.add(detail_2)
 # db.session.commit()
 
 # Example delete
@@ -64,44 +90,6 @@ print(user.admin)
 # db.session.delete(delete_this)
 # db.session.commit()
 
-
-
-
-# class Person(db.Model):
-#     id = db.Column(db.Integer, primary_key= True)
-#     name = db.Column(db.String(20))
-#     pets = db.relationship('Pet', backref= 'owner', lazy = 'dynamic')
-#
-#
-# class Pet(db.Model):
-#     id = db.Column(db.Integer, primary_key= True)
-#     name = db.Column(db.String(20))
-#     owner_id = db.Column(db.Integer, db.ForeignKey('person.id'))
-
-
-# db.create_all()
-# db.session.commit()
-
-
-# person_one = Person(name='Anthony')
-# person_two = Person(name='Cindy')
-# db.session.add(person_one)
-# db.session.add(person_two)
-# db.session.commit()
-#
-#
-# pet_one = Pet(name ='Spot', owner=person_one)
-# db.session.add(pet_one)
-# db.session.commit()
-
-#
-# user = Person.query.filter_by(id=1).first()
-# print(user.name)
-#
-#
-#
-#
-#
 
 app.secret_key = 'super secret string'  # todo Change this
 
@@ -206,6 +194,7 @@ def admin():
     if db_user.admin:
         return "Welcome admin! Logged in as " + flask_login.current_user.id
     return "Access denied! Only admin can view this page"
+
 
 @app.route('/logout')
 def logout():
