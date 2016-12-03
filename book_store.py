@@ -219,7 +219,10 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
-        return render_template('login.html')
+        if flask_login.current_user.is_authenticated:
+            return redirect(url_for('index'))
+        else:
+            return render_template('login.html')
 
     if request.method == 'POST':
         username = request.form['username']
@@ -230,7 +233,6 @@ def login():
                 user.id = username
                 flask_login.login_user(user)
                 return redirect(url_for('index'))
-
     return 'Bad login'
 
 
@@ -261,9 +263,11 @@ def signup():
 
 
 @app.route('/logout')
+@flask_login.login_required
 def logout():
+    username = flask_login.current_user.id
     flask_login.logout_user()
-    return 'Logged out'
+    return render_template('logout.html',username=username)
 
 
 @app.route('/profile')
@@ -309,7 +313,7 @@ def profile():
 def admin():
     db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
     if db_user.admin:
-        return "Welcome admin! Logged in as " + flask_login.current_user.id
+        return render_template('admin.html',username=flask_login.current_user.id)
     return "Access denied! Only admin can view this page"
 
 
