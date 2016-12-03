@@ -16,6 +16,36 @@
 
         <button type="button"><a href="logout">Log Out</a></button>
 
+        <form action='search' method='POST'>
+            <input type='text' name='title' id='title' placeholder= 'Search by Title'>
+            <input type='text' name='author' id='author' placeholder= 'Search by Author'>
+            <input type='text' name='publisher' id='publisher' placeholder= 'Search by Publisher'>
+            <input type='text' name='subject' id='subject' placeholder= 'Search by Subject'>
+
+            <p>Condition
+                <select name="condition" id="condition">
+                    <option value="and">and</option>
+                    <option value="or">or</option>
+                </select>
+                Sort by
+                <select name="sort_by" id="sort_by">
+                    <option value="year">Year</option>
+                    <option value="score">Review Score</option>
+                </select>
+                Order
+                <select name="order" id="order">
+                    <option value="increasing">Increasing</option>
+                    <option value="decreasing">Decreasing</option>
+                </select>
+
+            </p>
+
+
+
+            <input type='submit' name='submit'>
+        </form>
+
+
 
 
 </body>

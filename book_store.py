@@ -192,7 +192,6 @@ class InventoryTable(Table):
     add = ButtonCol('Add', 'add', url_kwargs=dict(ISBN='ISBN'))
 
 
-
 class InventoryItem(object):
     def __init__(self, ISBN, title, author, publisher, year, copy, price, format_1, subject):
         self.ISBN = ISBN
@@ -204,6 +203,7 @@ class InventoryItem(object):
         self.price = price
         self.format_1 = format_1
         self.subject = subject
+
 
 # ***********************************************************************************
 # ------------------------------------Flask------------------------------------------
@@ -295,7 +295,6 @@ def account():
                            account_info_table=account_info_table)
 
 
-
 @app.route('/account/order')
 @flask_login.login_required
 def order():
@@ -322,6 +321,68 @@ def order():
     return render_template('account_order.html', order_info_table=order_info_table)
 
 
+# ******************************* Account Pages ***************************************
+@app.route('/search', methods=['GET', 'POST'])
+@flask_login.login_required
+def search():
+    if request.method == 'POST':
+        title = request.form['title']
+        author = request.form['author']
+        publisher = request.form['publisher']
+        subject = request.form['subject']
+        condition = request.form['condition']
+        sort_by = request.form['sort_by']
+        order = request.form['order']
+
+        books_by_title = []
+        books_by_author = []
+        books_by_publisher = []
+        books_by_subject = []
+        input = []
+
+        if title != "":
+            books_by_title = DB_Book.query.filter_by(title=title).all()
+            input.append(books_by_title)
+        if author != "":
+            books_by_author = DB_Book.query.filter_by(author=author).all()
+            input.append(books_by_author)
+        if publisher != "":
+            books_by_publisher = DB_Book.query.filter_by(publisher=publisher).all()
+            input.append(books_by_publisher)
+        if books_by_subject != "":
+            books_by_subject = DB_Book.query.filter_by(subject=subject).all()
+            input.append(books_by_subject)
+
+        if condition == "and":
+            if len(input) == 0:
+                books_set = set()
+            else:
+                books_set = set(input[0])
+                index = 1
+                while index < len(input):
+                    books_set.intersection(input[index])
+                    index += 1
+        else:
+            books_set = set(books_by_title).union(books_by_author) \
+                .union(books_by_publisher) \
+                .union(books_by_subject)
+
+        books = []
+        for book in books_set:
+            books.append(book)
+
+        if sort_by == 'year':
+            if order == 'increasing':
+                books.sort(key=lambda x: x.year)
+            else:
+                books.sort(key=lambda x: x.year, reverse=True)
+        else:
+            # todo add score
+            print()
+
+    return "Searhc"
+
+
 # ******************************* Admin Pages ***************************************
 
 @app.route('/admin')
@@ -336,7 +397,7 @@ def admin():
 @app.route('/admin/inventory', methods=['GET', 'POST'])
 @flask_login.login_required
 def inventory():
-    if request.method =='GET':
+    if request.method == 'GET':
         db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
         if db_user.admin:
             inventory_info = []
@@ -377,31 +438,30 @@ def inventory():
             return redirect(url_for('inventory'))
 
 
-@app.route('/admin/inventory/add/<ISBN>', methods=['GET','POST'])
+@app.route('/admin/inventory/add/<ISBN>', methods=['GET', 'POST'])
 @flask_login.login_required
 def add(ISBN):
     if request.method == 'POST':
-        return render_template('admin_inventory_add.html', ISBN = ISBN)
+        return render_template('admin_inventory_add.html', ISBN=ISBN)
 
-@app.route('/admin/inventory/add/number', methods=['GET','POST'])
+
+@app.route('/admin/inventory/add/number', methods=['GET', 'POST'])
 @flask_login.login_required
 def number():
     if request.method == 'POST':
-        ISBN=request.form['ISBN']
-        number=request.form['number']
-        number=int(number)
+        ISBN = request.form['ISBN']
+        number = request.form['number']
+        number = int(number)
         db_book = DB_Book.query.filter_by(ISBN=ISBN).first()
-        db_book.copy+=number
+        db_book.copy += number
         db.session.commit()
     return redirect(url_for('inventory'))
+
 
 @app.route('/admin/statistics')
 @flask_login.login_required
 def statistics():
     return render_template('admin_statistics.html')
-
-
-
 
 
 if __name__ == '__main__':
