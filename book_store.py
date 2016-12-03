@@ -271,6 +271,9 @@ def logout():
     return render_template('logout.html', username=username)
 
 
+# ******************************* Account Pages ***************************************
+
+
 @app.route('/account')
 @flask_login.login_required
 def profile():
@@ -319,7 +322,7 @@ def order():
     return render_template('account_order.html', order_info_table=order_info_table)
 
 
-
+# ******************************* Admin Pages ***************************************
 
 @app.route('/admin')
 @flask_login.login_required
@@ -392,7 +395,10 @@ def number():
         db.session.commit()
     return redirect(url_for('inventory'))
 
-
+@app.route('/admin/statistics')
+@flask_login.login_required
+def statistics():
+    return render_template('admin_statistics.html')
 
 
 
