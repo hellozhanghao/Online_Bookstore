@@ -1,32 +1,63 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Login</title>
-</head>
-<body>
-            <header id="header">
-				<h1>Online Bookstore</h1>
-				<p>Welcome, please sign in.</p>
-			</header>
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Login</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+		<link rel="stylesheet" type=text/css href="/static/main.css" />
+
+	</head>
+	<body>
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<div class="inner">
+
+							<!-- Logo -->
+								<a href="/" class="logo">
+									<span class="symbol"><img src="../static/images/logo.svg" alt="" /></span><span class="title">Online Bookstore</span>
+								</a>
 
 
-                <!--Login Form-->
-                <form action='login' method='POST'>
-                    <input type='text' name='username' id='username' placeholder='username'></input>
-                    <input type='password' name="password" id='password' placeholder='password'></input>
-                    <input type='submit' name='submit'></input>
-                </form>
-
-                <!--&lt;!&ndash;Sign Up Button&ndash;&gt;-->
-                <!--<form action="signup">-->
-                    <!--<input type="submit" value="Go to Google" />-->
-                <!--</form>-->
-
-            <button type="button"><a href="signup">Sign Up</a></button>
+						</div>
+					</header>
 
 
-            <p>Admin username: admin  password: adminpass</p>
-            <p>Zhang Hao username: zhanghao password: password</p>
-</body>
+
+				<!-- Footer -->
+					<footer id="footer">
+						<div class="inner">
+							<section>
+								<h2>Welcome, please sign in</h2>
+								<form method="post" action="#">
+									<div class="field half first">
+										<input type="text" name="username" id="username" placeholder="Username" />
+									</div>
+									<div class="field half">
+										<input type="password" name="password" id="password" placeholder="Password" />
+									</div>
+									<ul class="actions">
+										<li><input type="submit" value="Log in" class="special" /></li>
+										<li><input type="button" value="Sign up" onclick="location.href='http://127.0.0.1:5000/signup'"></li>
+									</ul>
+								</form>
+                                <p>Admin username: admin  password: adminpass</p>
+                                <p>Zhang Hao username: zhanghao password: password</p>
+							</section>
+
+						</div>
+					</footer>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="/static/assets/js/jquery.min.js"></script>
+			<script src="/static/assets/js/skel.min.js"></script>
+			<script src="/static/assets/js/util.js"></script>
+			<script src="/static/assets/js/main.js"></script>
+
+	</body>
 </html>
