@@ -273,6 +273,14 @@ def logout():
 @app.route('/profile')
 @flask_login.login_required
 def profile():
+    # Account Info
+    db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
+    account_info = [Item('Username', db_user.username),
+                    Item('Credit Card', db_user.credit_card),
+                    Item('Address', db_user.address),
+                    Item('Phone', db_user.phone)]
+
+    account_info_table = ItemTable(account_info)
 
     # Order Details
     order_info = []
@@ -295,21 +303,10 @@ def profile():
 
     order_info_table = OrderTable(order_info)
 
-    return render_template('profile.html')
+    return render_template('profile.html',
+                           account_info_table=account_info_table,
+                           order_info_table=order_info_table)
 
-@app.route('/userAccount')
-@flask_login.login_required
-def account():
-    # Account Info
-    db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
-    account_info = [Item('Username', db_user.username),
-                    Item('Credit Card', db_user.credit_card),
-                    Item('Address', db_user.address),
-                    Item('Phone', db_user.phone)]
-
-    account_info_table = ItemTable(account_info)
-    return render_template('userAccount.html',
-                           account_info_table=account_info_table)
 
 @app.route('/admin')
 @flask_login.login_required

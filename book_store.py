@@ -46,16 +46,17 @@ class DB_Book(db.Model):
     keywords = db.Column('keywords', db.CHAR(100))
 
     def __init__(self, ISBN, title, author, publisher, year, copy, price, format, subject, keywords):
-        self.ISBN=ISBN
-        self.title=title
-        self.author=author
-        self.publisher=publisher
-        self.year=year
-        self.copy=copy
-        self.price=price
-        self.format=format
-        self.subject=subject
-        self.keywords=keywords
+        self.ISBN = ISBN
+        self.title = title
+        self.author = author
+        self.publisher = publisher
+        self.year = year
+        self.copy = copy
+        self.price = price
+        self.format = format
+        self.subject = subject
+        self.keywords = keywords
+
 
 class DB_Order(db.Model):
     __tablename__ = 'Orders'
@@ -199,9 +200,8 @@ class InventoryItem(object):
         self.year = year
         self.copy = copy
         self.price = price
-        self.format_1= format_1
+        self.format_1 = format_1
         self.subject = subject
-
 
 
 # ***********************************************************************************
@@ -213,7 +213,7 @@ class InventoryItem(object):
 @app.route('/')
 @flask_login.login_required
 def index():
-    return render_template('index.html',username=flask_login.current_user.id)
+    return render_template('index.html', username=flask_login.current_user.id)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -267,12 +267,18 @@ def signup():
 def logout():
     username = flask_login.current_user.id
     flask_login.logout_user()
-    return render_template('logout.html',username=username)
+    return render_template('logout.html', username=username)
 
 
-@app.route('/profile')
+@app.route('/account')
 @flask_login.login_required
 def profile():
+    return render_template('account.html')
+
+
+@app.route('/account/profile')
+@flask_login.login_required
+def account():
     # Account Info
     db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
     account_info = [Item('Username', db_user.username),
@@ -281,7 +287,14 @@ def profile():
                     Item('Phone', db_user.phone)]
 
     account_info_table = ItemTable(account_info)
+    return render_template('account_profile.html',
+                           account_info_table=account_info_table)
 
+
+
+@app.route('/account/order')
+@flask_login.login_required
+def order():
     # Order Details
     order_info = []
     orders = DB_Order.query.filter_by(username=flask_login.current_user.id).all()
@@ -302,10 +315,9 @@ def profile():
             entry += 1
 
     order_info_table = OrderTable(order_info)
+    return render_template('account_order.html', order_info_table=order_info_table)
 
-    return render_template('profile.html',
-                           account_info_table=account_info_table,
-                           order_info_table=order_info_table)
+
 
 
 @app.route('/admin')
@@ -313,14 +325,14 @@ def profile():
 def admin():
     db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
     if db_user.admin:
-        return render_template('admin.html',username=flask_login.current_user.id)
+        return render_template('admin.html', username=flask_login.current_user.id)
     return "Access denied! Only admin can view this page"
 
 
 @app.route('/admin/inventory', methods=['GET', 'POST'])
 @flask_login.login_required
 def inventory():
-    if request.method =='GET':
+    if request.method == 'GET':
         db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
         if db_user.admin:
             inventory_info = []
@@ -359,6 +371,7 @@ def inventory():
             db.session.add(new_book)
             db.session.commit()
             return redirect(url_for('inventory'))
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

@@ -1,21 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Sign Up</title>
-</head>
-<body>
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Sign up</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 
-                <!--Sign Up form-->
-                <form action='signup' method='POST'>
-                    <input type='text' name='username' id='username' placeholder='Username'></input>
-                    <input type='password' name="password" id='password' placeholder='Password'></input>
-                    <input type='text' name="credit_card" id='credit_card' placeholder="Credit Card">
-                    <input type='text' name="address" id='address' placeholder="Address">
-                    <input type='text' name="phone" id='phone' placeholder="Phone">
-                    <input type='submit' name='submit'></input>
-                </form>
+		<link rel="stylesheet" type=text/css href="/static/main.css" />
+
+	</head>
+	<body>
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<div class="inner">
+
+							<!-- Logo -->
+								<a href="/" class="logo">
+									<span class="symbol"><img src="static/images/logo.svg" alt="" /></span><span class="title">Online Bookstore</span>
+								</a>
 
 
-</body>
+						</div>
+					</header>
+
+
+
+				<!-- Footer -->
+					<footer id="footer">
+						<div class="inner">
+							<section>
+								<h2>Sign Up</h2>
+								<form method="post" action="#">
+									<div class="field half first">
+										<input type="text" name="username" id="username" placeholder="Username" />
+									</div>
+									<div class="field half">
+										<input type="password" name="password" id="password" placeholder="Password" />
+									</div>
+                                    <div class="field half first">
+                                        <input type='text' name="credit_card" id='credit_card' placeholder="Credit Card">
+                                    </div>
+                                    <div class="field half">
+                                        <input type='text' name="address" id='address' placeholder="Address">
+                                    </div>
+                                    <div class="field half first">
+                                        <input type='text' name="phone" id='phone' placeholder="Phone">
+                                    </div>
+									<ul class="actions">
+										<li><input type="button" value="Sign up"></li>
+									</ul>
+								</form>
+
+							</section>
+
+						</div>
+					</footer>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="/static/assets/js/jquery.min.js"></script>
+			<script src="/static/assets/js/skel.min.js"></script>
+			<script src="/static/assets/js/util.js"></script>
+			<script src="/static/assets/js/main.js"></script>
+
+	</body>
 </html>
