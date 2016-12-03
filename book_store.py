@@ -191,6 +191,7 @@ class InventoryTable(Table):
     subject = Col('Subject')
 
 
+
 class InventoryItem(object):
     def __init__(self, ISBN, title, author, publisher, year, copy, price, format_1, subject):
         self.ISBN = ISBN
@@ -259,7 +260,7 @@ def signup():
             flask_login.login_user(user)
             return redirect(url_for('index'))
 
-    return 'Bad Sign Up'
+    return 'Bad Sign Up! Username exist'
 
 
 @app.route('/logout')
