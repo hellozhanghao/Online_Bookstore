@@ -353,6 +353,11 @@ def inventory():
 
         return "Access denied! Only admin can view this page"
 
+@app.route('/admin/inventory', methods=['GET', 'POST'])
+@flask_login.login_required
+def newBook():
+    if request.method == 'GET':
+        return render_template('admin_new_books.html')
     if request.method == 'POST':
         ISBN = request.form['ISBN']
         db_book = DB_Book.query.filter_by(ISBN=ISBN).first()

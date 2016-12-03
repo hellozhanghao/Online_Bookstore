@@ -3,27 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <title>Inventory List</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/static/main.css" />
 </head>
 <body>
+<div id="wrapper">
+    <header id="header">
+        <div class="inner">
+            <!-- Logo -->
+            <a href="/" class="logo">
+                <span class="symbol"><img src="/static/images/logo.svg" alt="" /></span><span class="title">Online Bookstore</span>
+            </a>
+            <!-- Nav -->
+            <nav>
+                <ul>
+                    <li><a href="#menu">Menu</a></li>
+                </ul>
+            </nav>
 
-        <h1>Inventory</h1>
-        {{inventory_info_table}}
+        </div>
+    </header>
+    <!-- Main -->
+    <div id="main">
+        <div class="inner">
+            <h1>Inventory</h1>
+            <p>{{inventory_info_table}}</p>
+
+        </div>
+    </div>
+</div>
 
 
-        <h1>New Book</h1>
-        <!--New Book form-->
-        <form action='inventory' method='POST'>
-            <input type='text' name='ISBN' id='ISBN' placeholder='ISBN'>
-            <input type='text' name="title" id='title' placeholder='Title'/>
-            <input type='text' name="author" id='author' placeholder="Author">
-            <input type='text' name="publisher" id='publisher' placeholder="Publisher">
-            <input type='text' name="year" id='year' placeholder="Year">
-            <input type='number' name="copy" id='copy' placeholder="Copy">
-            <input type='number' name="price" id='price' placeholder="Price">
-            <input type='text' name="format" id='format' placeholder="Format">
-            <input type='text' name="subject" id='subject' placeholder="Subject">
-            <input type='text' name="keywords" id='keywords' placeholder="Keywords">
-            <input type='submit' name='submit'/>
-        </form>
+
 </body>
 </html>

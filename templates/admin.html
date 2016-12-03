@@ -2,12 +2,60 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Manager Portal</title>
+    <title>Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type=text/css href="/static/main.css" />
 </head>
 <body>
-        <h1>Welcome! Manager {{username}} !</h1>
+<div id="wrapper">
+     <!-- Header -->
+    <header id="header">
+			<div class="inner">
+				<!-- Logo -->
+				<a href="/" class="logo">
+				<span class="symbol"><img src="/static/images/logo.svg" alt="" /></span><span class="title">Online Bookstore</span>
+				</a>
+				<!-- Nav -->
+				<nav>
+				<ul>
+				<li><a href="#menu">Menu</a></li>
+				</ul>
+				</nav>
+				</div>
+        </header>
+    <div id="main">
+        <div class="inner">
+            <header>
+                <h2>Welcome! Manager {{username}} !</h2>
+            </header>
+            <section class="tiles">
+                <article class="style1">
+                    <span class="image">
+                        <img src="/static/images/pic01.jpg" alt="" />
+                    </span>
+                    <a href="/admin/inventory">
+                        <h2>Inventory</h2>
+                        <div class="content">
+                            <p>Check books in inventory.</p>
+                        </div>
+                    </a>
+                </article>
+                <article class="style2">
+                    <span class="image">
+                        <img src="static/images/pic02.jpg" alt="" />
+                    </span>
+                    <a href="/admin/new_book">
+                        <h2>New books</h2>
+                        <div class="content">
+                            <p>Add in new books.</p>
+                        </div>
+                    </a>
+                </article>
+            </section>
+        </div>
+    </div>
+</div>
 
-        <button type="button"><a href="admin/inventory">Inventory</a></button>
 
 </body>
 </html>
