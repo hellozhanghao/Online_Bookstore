@@ -4,7 +4,7 @@ from flask import redirect
 from flask_sqlalchemy import SQLAlchemy
 import datetime
 
-from flask_table import Table, Col
+from flask_table import Table, Col, ButtonCol
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:zhanghao@localhost/book_store'
@@ -189,6 +189,7 @@ class InventoryTable(Table):
     price = Col('Price')
     format_1 = Col('Format')
     subject = Col('Subject')
+    add = ButtonCol('Add', 'add', url_kwargs=dict(ISBN='ISBN'))
 
 
 
@@ -203,7 +204,6 @@ class InventoryItem(object):
         self.price = price
         self.format_1 = format_1
         self.subject = subject
-
 
 # ***********************************************************************************
 # ------------------------------------Flask------------------------------------------
@@ -333,7 +333,7 @@ def admin():
 @app.route('/admin/inventory', methods=['GET', 'POST'])
 @flask_login.login_required
 def inventory():
-    if request.method == 'GET':
+    if request.method =='GET':
         db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
         if db_user.admin:
             inventory_info = []
@@ -353,11 +353,6 @@ def inventory():
 
         return "Access denied! Only admin can view this page"
 
-@app.route('/admin/inventory', methods=['GET', 'POST'])
-@flask_login.login_required
-def newBook():
-    if request.method == 'GET':
-        return render_template('admin_new_books.html')
     if request.method == 'POST':
         ISBN = request.form['ISBN']
         db_book = DB_Book.query.filter_by(ISBN=ISBN).first()
@@ -377,6 +372,30 @@ def newBook():
             db.session.add(new_book)
             db.session.commit()
             return redirect(url_for('inventory'))
+
+
+@app.route('/admin/inventory/add/<ISBN>', methods=['GET','POST'])
+@flask_login.login_required
+def add(ISBN):
+    if request.method == 'POST':
+        return render_template('admin_inventory_add.html', ISBN = ISBN)
+
+@app.route('/admin/inventory/add/number', methods=['GET','POST'])
+@flask_login.login_required
+def number():
+    if request.method == 'POST':
+        ISBN=request.form['ISBN']
+        number=request.form['number']
+        number=int(number)
+        db_book = DB_Book.query.filter_by(ISBN=ISBN).first()
+        db_book.copy+=number
+        db.session.commit()
+    return redirect(url_for('inventory'))
+
+
+
+
+
 
 
 if __name__ == '__main__':
