@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventory List</title>
+</head>
+<body>
+
+        <h1>Inventory</h1>
+        {{inventory_info_table}}
+
+
+        <h1>New Book</h1>
+        <!--New Book form-->
+        <form action='inventory' method='POST'>
+            <input type='text' name='ISBN' id='ISBN' placeholder='ISBN'>
+            <input type='text' name="title" id='title' placeholder='Title'/>
+            <input type='text' name="author" id='author' placeholder="Author">
+            <input type='text' name="publisher" id='publisher' placeholder="Publisher">
+            <input type='text' name="year" id='year' placeholder="Year">
+            <input type='number' name="copy" id='copy' placeholder="Copy">
+            <input type='number' name="price" id='price' placeholder="Price">
+            <input type='text' name="format" id='format' placeholder="Format">
+            <input type='text' name="subject" id='subject' placeholder="Subject">
+            <input type='text' name="keywords" id='keywords' placeholder="Keywords">
+            <input type='submit' name='submit'/>
+        </form>
+</body>
+</html>

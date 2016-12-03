@@ -45,6 +45,17 @@ class DB_Book(db.Model):
     subject = db.Column('subject', db.CHAR(20))
     keywords = db.Column('keywords', db.CHAR(100))
 
+    def __init__(self, ISBN, title, author, publisher, year, copy, price, format, subject, keywords):
+        self.ISBN=ISBN
+        self.title=title
+        self.author=author
+        self.publisher=publisher
+        self.year=year
+        self.copy=copy
+        self.price=price
+        self.format=format
+        self.subject=subject
+        self.keywords=keywords
 
 class DB_Order(db.Model):
     __tablename__ = 'Orders'
@@ -167,6 +178,32 @@ class OrderItem(object):
         self.qty = qty
 
 
+class InventoryTable(Table):
+    ISBN = Col('ISBN')
+    title = Col('Title')
+    author = Col('Author')
+    publisher = Col('Publisher')
+    year = Col('Year')
+    copy = Col('Copy')
+    price = Col('Price')
+    format_1 = Col('Format')
+    subject = Col('Subject')
+
+
+class InventoryItem(object):
+    def __init__(self, ISBN, title, author, publisher, year, copy, price, format_1, subject):
+        self.ISBN = ISBN
+        self.title = title
+        self.author = author
+        self.publisher = publisher
+        self.year = year
+        self.copy = copy
+        self.price = price
+        self.format_1= format_1
+        self.subject = subject
+
+
+
 # ***********************************************************************************
 # ------------------------------------Flask------------------------------------------
 # ***********************************************************************************
@@ -176,7 +213,7 @@ class OrderItem(object):
 @app.route('/')
 @flask_login.login_required
 def index():
-    return redirect(url_for('login'))
+    return render_template('index.html',username=flask_login.current_user.id)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -192,7 +229,7 @@ def login():
                 user = User()
                 user.id = username
                 flask_login.login_user(user)
-                return redirect(url_for('protected'))
+                return redirect(url_for('index'))
 
     return 'Bad login'
 
@@ -218,9 +255,10 @@ def signup():
             user = User()
             user.id = username
             flask_login.login_user(user)
-            return redirect(url_for('protected'))
+            return redirect(url_for('index'))
 
     return 'Bad Sign Up'
+
 
 @app.route('/logout')
 def logout():
@@ -266,12 +304,6 @@ def profile():
                            order_info_table=order_info_table)
 
 
-@app.route('/protected')
-@flask_login.login_required
-def protected():
-    return 'Logged in as: ' + flask_login.current_user.id
-
-
 @app.route('/admin')
 @flask_login.login_required
 def admin():
@@ -281,8 +313,48 @@ def admin():
     return "Access denied! Only admin can view this page"
 
 
+@app.route('/admin/inventory', methods=['GET', 'POST'])
+@flask_login.login_required
+def inventory():
+    if request.method =='GET':
+        db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
+        if db_user.admin:
+            inventory_info = []
+            books = DB_Book.query.filter_by().all()
+            for book in books:
+                inventory_info.append(InventoryItem(book.ISBN,
+                                                    book.title,
+                                                    book.author,
+                                                    book.publisher,
+                                                    book.year,
+                                                    book.copy,
+                                                    book.price,
+                                                    book.format,
+                                                    book.subject))
+            inventory_info_table = InventoryTable(inventory_info)
+            return render_template('admin_inventory.html', inventory_info_table=inventory_info_table)
 
+        return "Access denied! Only admin can view this page"
 
+    if request.method == 'POST':
+        ISBN = request.form['ISBN']
+        db_book = DB_Book.query.filter_by(ISBN=ISBN).first()
+        if db_book is not None:
+            return "Book exist"
+        else:
+            new_book = DB_Book(ISBN,
+                               request.form['title'],
+                               request.form['author'],
+                               request.form['publisher'],
+                               request.form['year'],
+                               request.form['copy'],
+                               request.form['price'],
+                               request.form['format'],
+                               request.form['subject'],
+                               request.form['keywords'])
+            db.session.add(new_book)
+            db.session.commit()
+            return redirect(url_for('inventory'))
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
