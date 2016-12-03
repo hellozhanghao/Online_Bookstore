@@ -3,36 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <title>User Info</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type=text/css href="/static/main.css" />
 </head>
 <body>
-
-        <button type="button"><a href="/">Home Page</a></button>
-
-
-        <h1>User Profile</h1>
-        <h2></h2>
-        <h2>My Account Information</h2>
-        <!--Account Information Table-->
-        {{account_info_table}}
-        <!--<table>-->
-            <!--<thead><tr><th>Name</th><th>Description</th></tr></thead>-->
-            <!--<tbody>-->
-            <!--<tr><td>Name1</td><td>Description1</td></tr>-->
-            <!--<tr><td>Name2</td><td>Description2</td></tr>-->
-            <!--<tr><td>Name3</td><td>Description3</td></tr>-->
-            <!--</tbody>-->
-        <!--</table>-->
-        <h2></h2>
-        <h2>My Orders</h2>
-        {{order_info_table}}
-        <h2></h2>
-        <h2>My Feedbacks</h2>
-
-        <h2></h2>
-        <h2>Feedbacks I Reviewd</h2>
-
-
-
+<div id="wrapper">
+    <!-- Header -->
+    <header id="header">
+			<div class="inner">
+				<!-- Logo -->
+				<a href="/" class="logo">
+				<span class="symbol"><img src="/static/images/logo.svg" alt="" /></span><span class="title">Online Bookstore</span>
+				</a>
+				<!-- Nav -->
+				<nav>
+				<ul>
+				<li><a href="#menu">Menu</a></li>
+				</ul>
+				</nav>
+				</div>
+        </header>
+             <div id="main">
+                            <div class="inner">
+                                <header>
+                                    <h2>User profile</h2>
+                                </header>
+                                <section class="tiles">
+                                    <article class="style1">
+									<span class="image">
+										<img src="/static/images/pic01.jpg" alt="" />
+									</span>
+									<a href="http://127.0.0.1:5000/userAccount">
+										<h2>User Account</h2>
+										<div class="content">
+											<p>View   your   account   information.</p>
+										</div>
+									</a>
+								</article>
+                                    <article class="style2">
+									<span class="image">
+										<img src="static/images/pic02.jpg" alt="" />
+									</span>
+									<a href="generic.html">
+										<h2>Orders</h2>
+										<div class="content">
+											<p>View   your   order   list.</p>
+										</div>
+									</a>
+								</article>
+								<article class="style3">
+									<span class="image">
+										<img src="static/images/pic03.jpg" alt="" />
+									</span>
+									<a href="generic.html">
+										<h2>Feedbacks</h2>
+										<div class="content">
+											<p>View   your   feedbacks.</p>
+										</div>
+									</a>
+								</article>
+                                    <article class="style4">
+									<span class="image">
+										<img src="static/images/pic04.jpg" alt="" />
+									</span>
+									<a href="generic.html">
+										<h2>Reviewed Feedbacks</h2>
+										<div class="content">
+											<p>Check the feedbacks you reviewed.</p>
+										</div>
+									</a>
+								</article>
+                                </section>
+                            </div>
+                        </div>
+</div>
 
 </body>
 </html>
