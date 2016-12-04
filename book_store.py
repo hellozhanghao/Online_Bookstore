@@ -382,6 +382,77 @@ def admin():
     return "Access denied! Only admin can view this page"
 
 
+@app.route('/admin/inventory', methods=['GET', 'POST'])
+@flask_login.login_required
+def inventory():
+    if request.method == 'GET':
+        db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
+        if db_user.admin:
+            inventory_info = []
+            books = DB_Book.query.filter_by().all()
+            for book in books:
+                inventory_info.append(InventoryItem(book.ISBN,
+                                                    book.title,
+                                                    book.author,
+                                                    book.publisher,
+                                                    book.year,
+                                                    book.copy,
+                                                    book.price,
+                                                    book.format,
+                                                    book.subject))
+            inventory_info_table = InventoryTable(inventory_info)
+            return render_template('admin_inventory.html', inventory_info_table=inventory_info_table)
+
+        return "Access denied! Only admin can view this page"
+
+    if request.method == 'POST':
+        ISBN = request.form['ISBN']
+        db_book = DB_Book.query.filter_by(ISBN=ISBN).first()
+        if db_book is not None:
+            return "Book exist"
+        else:
+            new_book = DB_Book(ISBN,
+                               request.form['title'],
+                               request.form['author'],
+                               request.form['publisher'],
+                               request.form['year'],
+                               request.form['copy'],
+                               request.form['price'],
+                               request.form['format'],
+                               request.form['subject'],
+                               request.form['keywords'])
+            db.session.add(new_book)
+            db.session.commit()
+            return redirect(url_for('inventory'))
+
+
+@app.route('/admin/inventory/add/<ISBN>', methods=['GET', 'POST'])
+@flask_login.login_required
+def add(ISBN):
+    if request.method == 'POST':
+        return render_template('admin_inventory_add.html', ISBN=ISBN)
+
+
+@app.route('/admin/inventory/add/number', methods=['GET', 'POST'])
+@flask_login.login_required
+def number():
+    if request.method == 'POST':
+        ISBN = request.form['ISBN']
+        number = request.form['number']
+        number = int(number)
+        db_book = DB_Book.query.filter_by(ISBN=ISBN).first()
+        db_book.copy += number
+        db.session.commit()
+    return redirect(url_for('inventory'))
+
+
+@app.route('/admin/statistics')
+@flask_login.login_required
+def statistics():
+    return render_template('admin_statistics.html')
+
+
+
 # ******************************* Shopping ^_^ ***************************************
 
 
@@ -462,8 +533,20 @@ def search():
 @app.route('/detail/addtocart', methods=['GET', 'POST'])
 @flask_login.login_required
 def addtocart():
-    print(request.form['ISBN'])
-    return "Working in progress"
+    copy = int(request.form['copy'])
+
+    # load user
+    db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
+
+    # load Book
+    book_record = DB_Book.query.filter_by(ISBN=request.form['ISBN']).first()
+    if copy > book_record.copy:
+        return "Not enough stock!"
+
+    new_cart_record = DB_Shopping_Cart(flask_login.current_user.id,request.form['ISBN'],copy)
+    db.session.add(new_cart_record)
+    db.session.commit()
+    return redirect(url_for('cart'))
 
 
 @app.route('/detail/<ISBN>', methods=['GET', 'POST'])
@@ -488,75 +571,6 @@ def detail(ISBN):
     return render_template('detail.html', title=book.title, ISBN=ISBN,
                            author=book.author, info_table=info_table)
 
-
-@app.route('/admin/inventory', methods=['GET', 'POST'])
-@flask_login.login_required
-def inventory():
-    if request.method == 'GET':
-        db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
-        if db_user.admin:
-            inventory_info = []
-            books = DB_Book.query.filter_by().all()
-            for book in books:
-                inventory_info.append(InventoryItem(book.ISBN,
-                                                    book.title,
-                                                    book.author,
-                                                    book.publisher,
-                                                    book.year,
-                                                    book.copy,
-                                                    book.price,
-                                                    book.format,
-                                                    book.subject))
-            inventory_info_table = InventoryTable(inventory_info)
-            return render_template('admin_inventory.html', inventory_info_table=inventory_info_table)
-
-        return "Access denied! Only admin can view this page"
-
-    if request.method == 'POST':
-        ISBN = request.form['ISBN']
-        db_book = DB_Book.query.filter_by(ISBN=ISBN).first()
-        if db_book is not None:
-            return "Book exist"
-        else:
-            new_book = DB_Book(ISBN,
-                               request.form['title'],
-                               request.form['author'],
-                               request.form['publisher'],
-                               request.form['year'],
-                               request.form['copy'],
-                               request.form['price'],
-                               request.form['format'],
-                               request.form['subject'],
-                               request.form['keywords'])
-            db.session.add(new_book)
-            db.session.commit()
-            return redirect(url_for('inventory'))
-
-
-@app.route('/admin/inventory/add/<ISBN>', methods=['GET', 'POST'])
-@flask_login.login_required
-def add(ISBN):
-    if request.method == 'POST':
-        return render_template('admin_inventory_add.html', ISBN=ISBN)
-
-
-@app.route('/admin/inventory/add/number', methods=['GET', 'POST'])
-@flask_login.login_required
-def number():
-    if request.method == 'POST':
-        ISBN = request.form['ISBN']
-        number = request.form['number']
-        number = int(number)
-        db_book = DB_Book.query.filter_by(ISBN=ISBN).first()
-        db_book.copy += number
-        db.session.commit()
-    return redirect(url_for('inventory'))
-
-
-@app.route('/admin/statistics')
-@flask_login.login_required
-def statistics():
-    return render_template('admin_statistics.html')
 
 
 if __name__ == '__main__':
