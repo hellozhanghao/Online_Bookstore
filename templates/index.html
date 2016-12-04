@@ -58,6 +58,8 @@
                 </article>
             </section>
         </div>
+    </div>
+    <div id="main2">
         <div class="inner">
             <form action='search' method='POST'>
                 <div class="field half first">
@@ -72,35 +74,31 @@
                 <div class="field half">
                     <input type='text' name='subject' id='subject' placeholder= 'Search by Subject'>
                 </div>
-                <div class="field half first">
-                    <p>Condition</p>
-                </div>
-                <div class="field half">
-                    <select name="condition" id="condition">
+                <ul class="condition">
+                    <li><p>Condition</p></li>
+
+                    <li><select name="condition" id="condition">
                     <option value="and">and</option>
                     <option value="or">or</option>
-                    </select>
-                </div>
-                <div class="field half first">
-                    <p>Sort by</p>
-                </div>
-                <div class="field half">
-                    <select name="sort_by" id="sort_by">
+                    </select></li>
+
+                    <li><p>Sort by</p></li>
+
+                    <li><select name="sort_by" id="sort_by">
                     <option value="year">Year</option>
                     <option value="score">Review Score</option>
-                    </select>
-                </div>
-                <div class="field half first">
-                    <p>Order</p>
-                </div>
-                <div class="field half">
-                    <select name="order" id="order">
+                    </select></li>
+
+                    <li><p>Order</p></li>
+
+                    <li><select name="order" id="order">
                     <option value="increasing">Increasing</option>
                     <option value="decreasing">Decreasing</option>
-                    </select>>
-                </div>
+                    </select></li>
+
+                </ul>
                 <ul class="action">
-                    <input type='submit' name='submit'>
+                    <li><input type='submit' name='submit'></li>
                 </ul>
         </form>
         </div>
