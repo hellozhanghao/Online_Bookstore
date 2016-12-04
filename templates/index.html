@@ -79,20 +79,27 @@
             <section>
                 <div class="field half first">
                     Condition
+                </div>
+                <div class="field half">
                     <select name="condition" id="condition">
                     <option value="and">and</option>
                     <option value="or">or</option>
                     </select>
                 </div>
-                <div class="field half">
+                <div class="field half first">
                     Sort by
-                    <select name="sort_by" id="sort_by">
+
+                </div>
+                <div class="field half">
+                     <select name="sort_by" id="sort_by">
                     <option value="year">Year</option>
                     <option value="score">Review Score</option>
                     </select>
                 </div>
                 <div class="field half first">
                     Order
+                </div>
+                <div class="field half">
                     <select name="order" id="order">
                     <option value="increasing">Increasing</option>
                     <option value="decreasing">Decreasing</option>
@@ -100,7 +107,7 @@
                 </div>
 
             </section>
-            <div class="action">
+            <div id="action">
                     <input type='submit' name='submit'/>
                 </div>
             </form>
