@@ -89,7 +89,7 @@ class DB_Order_Detail(db.Model):
 class DB_Shopping_Cart(db.Model):
     __tablename__ = "Shopping_Cart"
     cart_item_id = db.Column(db.INTEGER, primary_key=True)
-    username = db.Column('username', db.ForeignKey('User.username'), )
+    username = db.Column('username', db.ForeignKey('User.username'))
     ISBN = db.Column('ISBN', db.ForeignKey('Book.ISBN'))
     quantity = db.Column('quantity', db.INTEGER)
 
@@ -97,6 +97,36 @@ class DB_Shopping_Cart(db.Model):
         self.username = username
         self.ISBN = ISBN
         self.quantity = quantity
+
+
+class DB_Review(db.Model):
+    __tablename__ = "Review"
+    review_id = db.Column(db.INTEGER, primary_key=True)
+    username = db.Column('username', db.ForeignKey('User.username'))
+    ISBN = db.Column('ISBN', db.ForeignKey('Book.ISBN'))
+    score = db.Column('score', db.INTEGER)
+    text = db.Column('text', db.CHAR(100))
+    date = db.Column('date', db.DATE)
+
+    def __init__(self, username, ISBN, score, text, date):
+        self.username = username
+        self.ISBN = ISBN
+        self.score = score
+        self.text = text
+        self.date = date
+
+
+class DB_Comment(db.Model):
+    __tablename__ = "Comment"
+    comment_id = db.Column(db.INTEGER, primary_key=True)
+    username = db.Column('username', db.ForeignKey('User.username'))
+    review_id = db.Column('review_id', db.ForeignKey('Review.review_id'))
+    usefulness = db.Column('usefulness', db.CHAR(100))
+
+    def __init__(self, username, review_id, usefulness):
+        self.username = username
+        self.review_id = review_id
+        self.usefulness = usefulness
 
 
 db.create_all()
@@ -296,11 +326,10 @@ def index():
         if book not in book_purchased:
             recommended_books.append(book)
 
-
     # order recommended books
     count_books = {}
     for book in recommended_books:
-        count_books[book]=0
+        count_books[book] = 0
 
     for user in related_users:
         for book_A in book_purchased:
@@ -310,7 +339,7 @@ def index():
             for order in orders:
                 order_details = DB_Order_Detail.query.filter_by(order_id=order.order_id, ISBN=book_A.ISBN).all()
                 if order_details is not None:
-                    user_purchased_book_A= True
+                    user_purchased_book_A = True
 
             if user_purchased_book_A:
                 for book_B in recommended_books:
@@ -323,7 +352,7 @@ def index():
 
     inv_map = {v: k for k, v in count_books.items()}
 
-    ordered_books=[]
+    ordered_books = []
     for item in sorted(inv_map):
         # print(inv_map[item].ISBN,item)
         ordered_books.append(inv_map[item])
@@ -336,9 +365,6 @@ def index():
         book_recommentation.append(BookItem(book.ISBN, book.title, book.author, book.publisher, book.year, book.price))
 
     book_recommentation_table = BookTable(book_recommentation)
-
-
-
 
     return render_template('index.html', username=flask_login.current_user.id,
                            book_recommentation_table=book_recommentation_table)
