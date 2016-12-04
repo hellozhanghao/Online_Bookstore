@@ -61,9 +61,10 @@
     </div>
     <div id="main2">
         <div class="inner">
-            <form action='search' method='POST'>
-                <div class="field half first">
-                    <input type='text' name='title' id='title' placeholder= 'Search by Title'>
+            <section>
+                <form action='search' method='POST'>
+                    <div class="field half first">
+                        <input type='text' name='title' id='title' placeholder= 'Search by Title'>
                 </div>
                 <div class="field half">
                     <input type='text' name='author' id='author' placeholder= 'Search by Author'>
@@ -74,6 +75,10 @@
                 <div class="field half">
                     <input type='text' name='subject' id='subject' placeholder= 'Search by Subject'>
                 </div>
+                </form>
+            </section>
+            <section>
+            <form action='search' method='POST'>
                 <div class="field half first">
                     Condition
                 </div>
@@ -101,10 +106,11 @@
                     <option value="decreasing">Decreasing</option>
                     </select>
                 </div>
-                <ul class="action">
+            </form>
+            </section>
+            <ul class="action">
                     <input type='submit' name='submit'>
                 </ul>
-        </form>
         </div>
     </div>
 </div>
