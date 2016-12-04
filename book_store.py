@@ -678,11 +678,39 @@ def statistics():
                 book_info.append(TopItem(book.title,popular_books[book]))
             book_info_table = TopItemTable(book_info)
 
+
+            # author mapping
+            popular_authors={}
+            for order in all_orders_this_month:
+                order_details = DB_Order_Detail.query.filter_by(order_id=order.order_id).all()
+                for order_detail in order_details:
+                    book = DB_Book.query.filter_by(ISBN=order_detail.ISBN).first()
+                    if book.author not in popular_authors:
+                        popular_authors[book.author] = order_detail.quantity
+                    else:
+                        popular_authors[book.author] += order_detail.quantity
+
+            sorted_authors = sorted(popular_authors, key=popular_authors.get,reverse=True)
+
+            if len(sorted_authors)<m:
+                m_sorted_authors = sorted_authors
+            else:
+                m_sorted_authors = sorted_authors[:m]
+
+            author_info =[]
+            for author in m_sorted_authors:
+                author_info.append(TopItem(author,popular_authors[author]))
+            author_info_table = TopItemTable(author_info)
+
+
+
+
             return render_template('admin_statistics_view.html',
                                    m=m,
                                    current_year=current_year,
                                    current_month=current_month,
-                                   book_info_table=book_info_table)
+                                   book_info_table=book_info_table,
+                                   author_info_table=author_info_table)
     return render_template('access_denied.html')
 
 
