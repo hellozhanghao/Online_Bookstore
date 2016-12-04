@@ -3,6 +3,7 @@ import flask_login
 from flask import redirect
 from flask_sqlalchemy import SQLAlchemy
 import datetime
+from calendar import monthrange
 
 from flask_table import Table, Col, ButtonCol
 
@@ -622,9 +623,26 @@ def statistics():
             return render_template('admin_statistics.html')
         if request.method == 'POST':
             m = request.form['m']
+            current_year = datetime.date.today().year
+            current_month = datetime.date.today().month
+            days = []
+            for i in range(1, monthrange(current_year, current_month)[1] + 1):
+                days.append(i)
 
+            dates_in_current_month = []
+            for day in days:
+                dates_in_current_month.append(datetime.date(current_year, current_month, day))
 
-            return render_template('admin_statistics_view.html')
+            all_orders_this_month = set()
+            for date in dates_in_current_month:
+                orders_on_date = DB_Order.query.filter_by(date=date).all()
+                for order_on_date in orders_on_date:
+                    all_orders_this_month.add(order_on_date)
+
+            return render_template('admin_statistics_view.html',
+                                   m=m,
+                                   current_year=current_year,
+                                   current_month=current_month)
     return render_template('access_denied.html')
 
 
