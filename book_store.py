@@ -305,6 +305,10 @@ def index():
     book_recommentation_table = BookTable(book_recommentation)
 
 
+    count_books={}
+    # for
+
+
 
 
 
@@ -482,7 +486,7 @@ def admin():
     db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
     if db_user.admin:
         return render_template('admin.html', username=flask_login.current_user.id)
-    return "Access denied! Only admin can view this page"
+    return render_template('access_denied.html')
 
 
 @app.route('/admin/inventory', methods=['GET', 'POST'])
@@ -506,7 +510,7 @@ def inventory():
             inventory_info_table = InventoryTable(inventory_info)
             return render_template('admin_inventory.html', inventory_info_table=inventory_info_table)
 
-        return "Access denied! Only admin can view this page"
+        return render_template('access_denied.html')
 
     if request.method == 'POST':
         ISBN = request.form['ISBN']
@@ -532,27 +536,40 @@ def inventory():
 @app.route('/admin/inventory/add/<ISBN>', methods=['GET', 'POST'])
 @flask_login.login_required
 def add(ISBN):
-    if request.method == 'POST':
+    # if request.method == 'POST':
+    #     return render_template('admin_inventory_add.html', ISBN=ISBN)
+    db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
+    if db_user.admin:
         return render_template('admin_inventory_add.html', ISBN=ISBN)
-
+    return render_template('access_denied.html')
 
 @app.route('/admin/inventory/add/number', methods=['GET', 'POST'])
 @flask_login.login_required
 def number():
-    if request.method == 'POST':
-        ISBN = request.form['ISBN']
-        number = request.form['number']
-        number = int(number)
-        db_book = DB_Book.query.filter_by(ISBN=ISBN).first()
-        db_book.copy += number
-        db.session.commit()
-    return redirect(url_for('inventory'))
+    db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
+    if db_user.admin:
+        if request.method == 'POST':
+            ISBN = request.form['ISBN']
+            number = request.form['number']
+            number = int(number)
+            db_book = DB_Book.query.filter_by(ISBN=ISBN).first()
+            db_book.copy += number
+            db.session.commit()
+        return redirect(url_for('inventory'))
+    return render_template('access_denied.html')
+
+
 
 
 @app.route('/admin/statistics')
 @flask_login.login_required
 def statistics():
-    return render_template('admin_statistics.html')
+    db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
+    if db_user.admin:
+        return render_template('admin_statistics.html')
+    return render_template('access_denied.html')
+
+
 
 
 # ******************************* Shopping ^_^ ***************************************
