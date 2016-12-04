@@ -385,25 +385,32 @@ def checkout():
         if book_item.copy < cart_item.quantity:
             return "No enough stock for "+ book_item.title
 
+    # update inventory
+    for cart_item in cart_items:
+        book_item = DB_Book.query.filter_by(ISBN = cart_item.ISBN).first()
+        book_item.copy -= cart_item.quantity
+        db.session.commit()
+
+
+
     # create order
     new_order = DB_Order(flask_login.current_user.id,datetime.date.today(),'Shipped')
     db.session.add(new_order)
     db.session.commit()
 
+    # create order items
     for cart_item in cart_items:
         book_item = DB_Book.query.filter_by(ISBN = cart_item.ISBN).first()
         new_order_detail = DB_Order_Detail(new_order.order_id,book_item.ISBN,cart_item.quantity)
+        db.session.add(new_order_detail)
+        db.session.commit()
 
-    # create order items
-
-    # update inventory
-
-
-
-
-
-
-    return "Working in progress"
+    # update shopping cart
+    cart_items = DB_Shopping_Cart.query.filter_by(username=flask_login.current_user.id).all()
+    for cart_item in cart_items:
+        db.session.delete(cart_item)
+        db.session.commit()
+    return redirect(url_for('order'))
 
 
 # ******************************* Admin Pages ***************************************
