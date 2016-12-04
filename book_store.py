@@ -704,13 +704,39 @@ def statistics():
 
 
 
+            # publisher mapping
+            popular_publishers = {}
+            for order in all_orders_this_month:
+                order_details = DB_Order_Detail.query.filter_by(order_id=order.order_id).all()
+                for order_detail in order_details:
+                    book = DB_Book.query.filter_by(ISBN=order_detail.ISBN).first()
+                    if book.publisher not in popular_publishers:
+                        popular_publishers[book.publisher] = order_detail.quantity
+                    else:
+                        popular_publishers[book.publisher] += order_detail.quantity
+
+            sorted_publishers = sorted(popular_publishers, key=popular_publishers.get, reverse=True)
+
+            if len(sorted_publishers) < m:
+                m_sorted_publishers = sorted_publishers
+            else:
+                m_sorted_publishers = sorted_publishers[:m]
+
+            publisher_info = []
+            for publisher in m_sorted_publishers:
+                publisher_info.append(TopItem(publisher, popular_publishers[publisher]))
+            publisher_info_table = TopItemTable(publisher_info)
+
+
+
 
             return render_template('admin_statistics_view.html',
                                    m=m,
                                    current_year=current_year,
                                    current_month=current_month,
                                    book_info_table=book_info_table,
-                                   author_info_table=author_info_table)
+                                   author_info_table=author_info_table,
+                                   publisher_info_table=publisher_info_table)
     return render_template('access_denied.html')
 
 
