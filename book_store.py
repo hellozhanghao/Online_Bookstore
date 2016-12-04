@@ -392,7 +392,8 @@ def checkout():
 
     for cart_item in cart_items:
         book_item = DB_Book.query.filter_by(ISBN = cart_item.ISBN).first()
-        # new_order_detail = DB_Order_Detail
+        new_order_detail = DB_Order_Detail(new_order.order_id,book_item.ISBN,cart_item.quantity)
+
     # create order items
 
     # update inventory
