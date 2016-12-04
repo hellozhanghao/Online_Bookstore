@@ -270,6 +270,21 @@ class BookItem(object):
         self.price = price
 
 
+
+class TopItemTable(Table):
+    name = Col('')
+    description = Col('Qty')
+
+
+class TopItem(object):
+    def __init__(self, name, description):
+        self.name = name
+        self.description = description
+
+
+
+
+
 # ***********************************************************************************
 # ------------------------------------Flask------------------------------------------
 # ***********************************************************************************
@@ -622,7 +637,7 @@ def statistics():
         if request.method == 'GET':
             return render_template('admin_statistics.html')
         if request.method == 'POST':
-            m = request.form['m']
+            m = int(request.form['m'])
             current_year = datetime.date.today().year
             current_month = datetime.date.today().month
             days = []
@@ -639,10 +654,35 @@ def statistics():
                 for order_on_date in orders_on_date:
                     all_orders_this_month.add(order_on_date)
 
+            # book mapping
+            popular_books={}
+            for order in all_orders_this_month:
+                order_details = DB_Order_Detail.query.filter_by(order_id=order.order_id).all()
+                for order_detail in order_details:
+                    book = DB_Book.query.filter_by(ISBN=order_detail.ISBN).first()
+                    if book not in popular_books:
+                        popular_books[book] = order_detail.quantity
+                    else:
+                        popular_books[book] += order_detail.quantity
+
+            sorted_books = sorted(popular_books, key=popular_books.get, reverse=True)
+
+            if len(sorted_books)< m:
+                m_sorted_books = sorted_books
+            else:
+                m_sorted_books = sorted_books[:m]
+
+
+            book_info = []
+            for book in m_sorted_books:
+                book_info.append(TopItem(book.title,popular_books[book]))
+            book_info_table = TopItemTable(book_info)
+
             return render_template('admin_statistics_view.html',
                                    m=m,
                                    current_year=current_year,
-                                   current_month=current_month)
+                                   current_month=current_month,
+                                   book_info_table=book_info_table)
     return render_template('access_denied.html')
 
 
