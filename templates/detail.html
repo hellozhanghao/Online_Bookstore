@@ -3,30 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <title>Book Detail {{title}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type=text/css href="/static/main.css" />
 </head>
 <body>
-
-        <h1>Book Detail</h1>
-        <h2>{{title}} by {{author}}</h2>
-
-        {{info_table}}
-
-
-        <!--<input type="submit" name="submit" value="Add To Cart">-->
+<div id="wrapper">
+<header id="header">
+        <div class="inner">
+			<!-- Logo -->
+			<a href="/" class="logo">
+				<span class="symbol"><img src="/static/images/logo.svg" alt="" /></span><span class="title">Online Bookstore</span>
+			</a>
+		</div>
+    </header>
+    <div id="main">
+        <div class="inner">
+            <header>
+                <h1>Book Detail</h1>
+                <h2>{{title}} by {{author}}</h2>
+            </header>
+            <p>{{info_table}}</p>
+        </div>
+    </div>
+    <div id="main2">
+        <div class="inner"><!--<input type="submit" name="submit" value="Add To Cart">-->
         <!--<input type="submit" name="submit" value="Do Something Else">-->
-
+            <!--<input type="button" value="Sign up" onclick="location.href='/AddToCart?ISBN={{ISBN}}'">-->
         <form action='addtocart' method='POST'>
-            <p> Qty :
-                <input type='number' name='copy' id='copy' placeholder= 'Number of Copy'>
+            <div class="field half first">
+                Qty:
+            </div>
+            <div class="field half">
+                <input type='number' name='copy' id='copy' placeholder= 'Number of Copy'/>
+            </div>
+            <div>
                 <input type="hidden" name="ISBN" value="{{ISBN}}">
-                <input type='submit' name='submit' value="Add To Cart">
-            </p>
-
+            </div>
+            <ul class="action">
+                <input type='submit' name='submit' value="Add To Cart"/>
+            </ul>
 
         </form>
-
-        <!--<input type="button" value="Sign up" onclick="location.href='/AddToCart?ISBN={{ISBN}}'">-->
-
-
+        </div>
+    </div>
+</div>
+		<!-- Scripts -->
+			<script src="/static/assets/js/jquery.min.js"></script>
+			<script src="/static/assets/js/skel.min.js"></script>
+			<script src="/static/assets/js/util.js"></script>
+			<script src="/static/assets/js/main.js"></script>
 </body>
 </html>
