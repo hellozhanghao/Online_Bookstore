@@ -20,10 +20,8 @@
         <div class="inner">
             <!--Add Form-->
                 <form action='number' method='POST'>
+                    <input type='hidden' name='ISBN' id='ISBN' value={{ISBN}}>
                     <div class="field half first">
-                    <input type='text' name='ISBN' id='ISBN' value={{ISBN}}>
-                    </div>
-                    <div class="field half">
                     <input type='number' name='number' id='number' placeholder='Number of Copies'>
                     </div>
                     <ul class="actions">

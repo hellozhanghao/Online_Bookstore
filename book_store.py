@@ -613,13 +613,30 @@ def number():
     return render_template('access_denied.html')
 
 
-@app.route('/admin/statistics')
+@app.route('/admin/statistics', methods=['GET', 'POST'])
 @flask_login.login_required
 def statistics():
     db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
     if db_user.admin:
-        return render_template('admin_statistics.html')
+        if request.method == 'GET':
+            return render_template('admin_statistics.html')
+        if request.method == 'POST':
+            m = request.form['m']
+
+
+            return render_template('admin_statistics_view.html')
     return render_template('access_denied.html')
+
+
+# @app.route('/admin/statistics/view', methods= ['GET', 'POST'])
+# @flask_login.login_required
+# def view():
+#     db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
+#     if db_user.admin:
+#         if request.method =='POST':
+#             return "hahah"
+#     return render_template('access_denied.html')
+
 
 
 # ******************************* Shopping ^_^ ***************************************
@@ -755,6 +772,16 @@ def detail(ISBN):
 
     return render_template('detail.html', title=book.title, ISBN=ISBN,
                            author=book.author, info_table=info_table)
+
+
+# ******************************* Review and Comment ***********************************
+
+
+
+
+
+
+
 
 
 if __name__ == '__main__':
