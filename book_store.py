@@ -387,6 +387,7 @@ def checkout():
 
     # create order
 
+
     # create order items
 
     # update inventory
