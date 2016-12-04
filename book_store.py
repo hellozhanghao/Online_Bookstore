@@ -250,14 +250,13 @@ class BookItem(object):
 def index():
     # get books user purchased
     orders = DB_Order.query.filter_by(username=flask_login.current_user.id).all()
-    book_purchased =set()
+    book_purchased = set()
     for order in orders:
         order_details = DB_Order_Detail.query.filter_by(order_id=order.order_id).all()
         for order_detail in order_details:
-            book = DB_Book.query.filter_by(ISBN = order_detail.ISBN).first()
+            book = DB_Book.query.filter_by(ISBN=order_detail.ISBN).first()
             if book not in book_purchased:
                 book_purchased.add(book)
-
 
     # get my orders
     my_orders = set()
@@ -269,14 +268,14 @@ def index():
     for book in book_purchased:
         order_details_related_to_book = DB_Order_Detail.query.filter_by(ISBN=book.ISBN).all()
         for order_detail in order_details_related_to_book:
-            order = DB_Order.query.filter_by(order_id= order_detail.order_id).first()
+            order = DB_Order.query.filter_by(order_id=order_detail.order_id).first()
             if (order not in order_related) and (order not in my_orders):
                 order_related.add(order)
 
     # map related order to related user
     related_users = set()
     for order in order_related:
-        user = DB_User.query.filter_by(username = order.username).first()
+        user = DB_User.query.filter_by(username=order.username).first()
         if user not in related_users:
             related_users.add(user)
 
@@ -291,23 +290,52 @@ def index():
                 if book not in book_purchased_by_others:
                     book_purchased_by_others.add(book)
 
-
     # get recommended books
-    recommended_books=[]
+    recommended_books = []
     for book in book_purchased_by_others:
         if book not in book_purchased:
             recommended_books.append(book)
 
-    book_recommentation=[]
+
+    # order recommended books
+    count_books = {}
     for book in recommended_books:
-        book_recommentation.append(BookItem(book.ISBN,book.title,book.author,book.publisher,book.year,book.price))
+        count_books[book]=0
+
+    for user in related_users:
+        for book_A in book_purchased:
+
+            user_purchased_book_A = False
+            orders = DB_Order.query.filter_by(username=user.username).all()
+            for order in orders:
+                order_details = DB_Order_Detail.query.filter_by(order_id=order.order_id, ISBN=book_A.ISBN).all()
+                if order_details is not None:
+                    user_purchased_book_A= True
+
+            if user_purchased_book_A:
+                for book_B in recommended_books:
+                    for order in orders:
+                        order_details = DB_Order_Detail.query.filter_by(order_id=order.order_id, ISBN=book_B.ISBN).all()
+
+                        for order_detail in order_details:
+                            book = DB_Book.query.filter_by(ISBN=order_detail.ISBN).first()
+                            count_books[book] += order_detail.quantity
+
+    inv_map = {v: k for k, v in count_books.items()}
+
+    ordered_books=[]
+    for item in sorted(inv_map):
+        # print(inv_map[item].ISBN,item)
+        ordered_books.append(inv_map[item])
+
+    ordered_books.reverse()
+
+    # generate table
+    book_recommentation = []
+    for book in ordered_books:
+        book_recommentation.append(BookItem(book.ISBN, book.title, book.author, book.publisher, book.year, book.price))
 
     book_recommentation_table = BookTable(book_recommentation)
-
-
-    count_books={}
-    # for
-
 
 
 
@@ -440,33 +468,32 @@ def cart():
     return render_template('account_cart.html', cart_info_table=cart_info_table,
                            total_qty=total_qty, total_price=round(total_price, 2))
 
+
 @app.route('/account/checkout')
 @flask_login.login_required
 def checkout():
     # check availability
     cart_items = DB_Shopping_Cart.query.filter_by(username=flask_login.current_user.id).all()
     for cart_item in cart_items:
-        book_item = DB_Book.query.filter_by(ISBN = cart_item.ISBN).first()
+        book_item = DB_Book.query.filter_by(ISBN=cart_item.ISBN).first()
         if book_item.copy < cart_item.quantity:
-            return "No enough stock for "+ book_item.title
+            return "No enough stock for " + book_item.title
 
     # update inventory
     for cart_item in cart_items:
-        book_item = DB_Book.query.filter_by(ISBN = cart_item.ISBN).first()
+        book_item = DB_Book.query.filter_by(ISBN=cart_item.ISBN).first()
         book_item.copy -= cart_item.quantity
         db.session.commit()
 
-
-
     # create order
-    new_order = DB_Order(flask_login.current_user.id,datetime.date.today(),'Shipped')
+    new_order = DB_Order(flask_login.current_user.id, datetime.date.today(), 'Shipped')
     db.session.add(new_order)
     db.session.commit()
 
     # create order items
     for cart_item in cart_items:
-        book_item = DB_Book.query.filter_by(ISBN = cart_item.ISBN).first()
-        new_order_detail = DB_Order_Detail(new_order.order_id,book_item.ISBN,cart_item.quantity)
+        book_item = DB_Book.query.filter_by(ISBN=cart_item.ISBN).first()
+        new_order_detail = DB_Order_Detail(new_order.order_id, book_item.ISBN, cart_item.quantity)
         db.session.add(new_order_detail)
         db.session.commit()
 
@@ -543,6 +570,7 @@ def add(ISBN):
         return render_template('admin_inventory_add.html', ISBN=ISBN)
     return render_template('access_denied.html')
 
+
 @app.route('/admin/inventory/add/number', methods=['GET', 'POST'])
 @flask_login.login_required
 def number():
@@ -559,8 +587,6 @@ def number():
     return render_template('access_denied.html')
 
 
-
-
 @app.route('/admin/statistics')
 @flask_login.login_required
 def statistics():
@@ -568,8 +594,6 @@ def statistics():
     if db_user.admin:
         return render_template('admin_statistics.html')
     return render_template('access_denied.html')
-
-
 
 
 # ******************************* Shopping ^_^ ***************************************
@@ -670,7 +694,8 @@ def addtocart():
             book_exist = True
     if book_exist:
         print("Exist")
-        cart_record = DB_Shopping_Cart.query.filter_by(username=flask_login.current_user.id,ISBN=request.form['ISBN']).first()
+        cart_record = DB_Shopping_Cart.query.filter_by(username=flask_login.current_user.id,
+                                                       ISBN=request.form['ISBN']).first()
         print(cart_record.quantity)
         cart_record.quantity += copy
         db.session.commit()
