@@ -205,6 +205,27 @@ class InventoryItem(object):
         self.subject = subject
 
 
+class BookTable(Table):
+    ISBN = Col('ISBN')
+    title = Col('Title')
+    author = Col('Author')
+    publisher = Col('Publisher')
+    year = Col('Year')
+    price = Col('Price')
+    # add = ButtonCol('Add To Cart', 'cart', url_kwargs=dict(ISBN='ISBN'))
+    detial = ButtonCol('View Details', 'search', url_kwargs=dict(ISBN='ISBN'))
+
+
+class BookItem(object):
+    def __init__(self, ISBN, title, author, publisher, year, price, ):
+        self.ISBN = ISBN
+        self.title = title
+        self.author = author
+        self.publisher = publisher
+        self.year = year
+        self.price = price
+
+
 # ***********************************************************************************
 # ------------------------------------Flask------------------------------------------
 # ***********************************************************************************
@@ -326,61 +347,74 @@ def order():
 @flask_login.login_required
 def search():
     if request.method == 'POST':
-        title = request.form['title']
-        author = request.form['author']
-        publisher = request.form['publisher']
-        subject = request.form['subject']
-        condition = request.form['condition']
-        sort_by = request.form['sort_by']
-        order = request.form['order']
+        if dict(request.args) == {}:
+            title = request.form['title']
+            author = request.form['author']
+            publisher = request.form['publisher']
+            subject = request.form['subject']
+            condition = request.form['condition']
+            sort_by = request.form['sort_by']
+            order = request.form['order']
 
-        books_by_title = []
-        books_by_author = []
-        books_by_publisher = []
-        books_by_subject = []
-        input = []
+            books_by_title = []
+            books_by_author = []
+            books_by_publisher = []
+            books_by_subject = []
+            input = []
 
-        if title != "":
-            books_by_title = DB_Book.query.filter_by(title=title).all()
-            input.append(books_by_title)
-        if author != "":
-            books_by_author = DB_Book.query.filter_by(author=author).all()
-            input.append(books_by_author)
-        if publisher != "":
-            books_by_publisher = DB_Book.query.filter_by(publisher=publisher).all()
-            input.append(books_by_publisher)
-        if books_by_subject != "":
-            books_by_subject = DB_Book.query.filter_by(subject=subject).all()
-            input.append(books_by_subject)
+            if title != "":
+                books_by_title = DB_Book.query.filter_by(title=title).all()
+                input.append(books_by_title)
+            if author != "":
+                books_by_author = DB_Book.query.filter_by(author=author).all()
+                input.append(books_by_author)
+            if publisher != "":
+                books_by_publisher = DB_Book.query.filter_by(publisher=publisher).all()
+                input.append(books_by_publisher)
+            if books_by_subject != "":
+                books_by_subject = DB_Book.query.filter_by(subject=subject).all()
+                input.append(books_by_subject)
 
-        if condition == "and":
-            if len(input) == 0:
-                books_set = set()
+            if condition == "and":
+                if len(input) == 0:
+                    books_set = set()
+                else:
+                    books_set = set(input[0])
+                    index = 1
+                    while index < len(input):
+                        books_set.intersection(input[index])
+                        index += 1
             else:
-                books_set = set(input[0])
-                index = 1
-                while index < len(input):
-                    books_set.intersection(input[index])
-                    index += 1
-        else:
-            books_set = set(books_by_title).union(books_by_author) \
-                .union(books_by_publisher) \
-                .union(books_by_subject)
+                books_set = set(books_by_title).union(books_by_author) \
+                    .union(books_by_publisher) \
+                    .union(books_by_subject)
 
-        books = []
-        for book in books_set:
-            books.append(book)
+            books = []
+            for book in books_set:
+                books.append(book)
 
-        if sort_by == 'year':
-            if order == 'increasing':
-                books.sort(key=lambda x: x.year)
+            if sort_by == 'year':
+                if order == 'increasing':
+                    books.sort(key=lambda x: x.year)
+                else:
+                    books.sort(key=lambda x: x.year, reverse=True)
             else:
-                books.sort(key=lambda x: x.year, reverse=True)
-        else:
-            # todo add score
-            print()
+                # todo add score
+                print()
 
-    return "Searhc"
+            book_info = []
+            for book in books:
+                book_info.append(BookItem(book.ISBN,
+                                          book.title,
+                                          book.author,
+                                          book.publisher,
+                                          book.year,
+                                          book.price))
+
+            book_info_table = BookTable(book_info)
+            return render_template('search.html', book_info_table=book_info_table)
+        else:
+            return redirect(url_for('detail', ISBN=request.args['ISBN']))
 
 
 # ******************************* Admin Pages ***************************************
@@ -392,6 +426,41 @@ def admin():
     if db_user.admin:
         return render_template('admin.html', username=flask_login.current_user.id)
     return "Access denied! Only admin can view this page"
+
+
+@app.route('/AddToCart', methods=['GET', 'POST'])
+@flask_login.login_required
+def addToCart():
+    return request.args['ISBN']
+
+
+@app.route('/detail/addtocart', methods=['GET', 'POST'])
+@flask_login.login_required
+def addtocart():
+    return request.form['ISBN']
+
+
+@app.route('/detail/<ISBN>', methods=['GET', 'POST'])
+@flask_login.login_required
+def detail(ISBN):
+    book = DB_Book.query.filter_by(ISBN=ISBN).first()
+
+    info = []
+    info.append(Item("Titile", book.title))
+    info.append(Item("ISBN", book.ISBN))
+    info.append(Item("Author", book.author))
+    info.append(Item("Publisher", book.publisher))
+    info.append(Item("Year", book.year))
+    info.append(Item("Copy in stock", book.copy))
+    info.append(Item("Price", book.price))
+    info.append(Item("Format", book.format))
+    info.append(Item("Subject", book.subject))
+    info.append(Item("Key Words", book.keywords))
+
+    info_table = ItemTable(info)
+
+    return render_template('detail.html', title=book.title, ISBN=ISBN,
+                           author=book.author, info_table=info_table)
 
 
 @app.route('/admin/inventory', methods=['GET', 'POST'])
