@@ -3,16 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <title>Statistics</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/static/main.css" />
 </head>
 <body>
+<div id="wrapper">
+    <header id="header">
+        <div class="inner">
+            <!-- Logo -->
+            <a href="/" class="logo">
+                <span class="symbol"><img src="/static/images/logo.svg" alt="" /></span><span class="title">Online Bookstore</span>
+            </a>
+            <!-- Nav -->
+            <nav>
+                <ul>
+                    <li><a href="#menu">Menu</a></li>
+                </ul>
+            </nav>
 
+        </div>
+    </header>
+    <!-- Menu -->
+					<nav id="menu">
+						<h2>Menu</h2>
+						<ul>
+							<li><a href="/">Home</a></li>
+							<li><a href="/admin/inventory">Inventory</a></li>
+							<li><a href="/admin/statistics">Statistics</a></li>
+						</ul>
+					</nav>
+    <div id="main">
+        <div class="inner">
             <h2>Choose the number of result you want to see.</h2>
-
-        <form action='/admin/statistics' method='POST'>
-                M:
-                <input type='number' name='m' id='m' placeholder= 'any positive integer'/>
-                <input type='submit' name='submit' value="View"/>
+            <form action='/admin/statistics' method='POST'>
+                <div>
+                    M:
+                </div>
+                <div class="field half first">
+                    <input type='number' name='m' id='m' placeholder= 'any positive integer'/>
+                </div>
+                <div class="field half">
+                    <input type='submit' name='submit' value="View"/>
+                </div>
         </form>
+        </div>
+    </div>
+</div>
+
+		<!-- Scripts -->
+			<script src="/static/assets/js/jquery.min.js"></script>
+			<script src="/static/assets/js/skel.min.js"></script>
+			<script src="/static/assets/js/util.js"></script>
+			<script src="/static/assets/js/main.js"></script>
+
+
 
 </body>
 </html>
