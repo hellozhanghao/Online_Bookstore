@@ -386,8 +386,13 @@ def checkout():
             return "No enough stock for "+ book_item.title
 
     # create order
+    new_order = DB_Order(flask_login.current_user.id,datetime.date.today(),'Shipped')
+    db.session.add(new_order)
+    db.session.commit()
 
-
+    for cart_item in cart_items:
+        book_item = DB_Book.query.filter_by(ISBN = cart_item.ISBN).first()
+        # new_order_detail = DB_Order_Detail
     # create order items
 
     # update inventory
