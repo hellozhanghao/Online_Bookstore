@@ -179,6 +179,19 @@ class OrderItem(object):
         self.qty = qty
 
 
+class CartTable(Table):
+    ISBN = Col('ISBN')
+    book = Col('Book Name')
+    qty = Col('Quantity')
+
+
+class CartItem(object):
+    def __init__(self, ISBN, book, qty):
+        self.ISBN = ISBN
+        self.book = book
+        self.qty = qty
+
+
 class InventoryTable(Table):
     ISBN = Col('ISBN')
     title = Col('Title')
@@ -342,7 +355,36 @@ def order():
     return render_template('account_order.html', order_info_table=order_info_table)
 
 
-# ******************************* Account Pages ***************************************
+@app.route('/account/cart')
+@flask_login.login_required
+def cart():
+    # cart detail
+    cart_info = []
+
+    carts = DB_Shopping_Cart.query.filter_by(username=flask_login.current_user.id).all()
+    for cart in carts:
+        book = DB_Book.query.filter_by(ISBN=cart.ISBN).first()
+        cart_info.append(CartItem(cart.ISBN, book.title, cart.quantity))
+
+    cart_info_table = CartTable(cart_info)
+
+    return render_template('account_cart.html', cart_info_table=cart_info_table)
+
+
+# ******************************* Admin Pages ***************************************
+
+@app.route('/admin')
+@flask_login.login_required
+def admin():
+    db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
+    if db_user.admin:
+        return render_template('admin.html', username=flask_login.current_user.id)
+    return "Access denied! Only admin can view this page"
+
+
+# ******************************* Shopping ^_^ ***************************************
+
+
 @app.route('/search', methods=['GET', 'POST'])
 @flask_login.login_required
 def search():
@@ -417,27 +459,11 @@ def search():
             return redirect(url_for('detail', ISBN=request.args['ISBN']))
 
 
-# ******************************* Admin Pages ***************************************
-
-@app.route('/admin')
-@flask_login.login_required
-def admin():
-    db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
-    if db_user.admin:
-        return render_template('admin.html', username=flask_login.current_user.id)
-    return "Access denied! Only admin can view this page"
-
-
-@app.route('/AddToCart', methods=['GET', 'POST'])
-@flask_login.login_required
-def addToCart():
-    return request.args['ISBN']
-
-
 @app.route('/detail/addtocart', methods=['GET', 'POST'])
 @flask_login.login_required
 def addtocart():
-    return request.form['ISBN']
+    print(request.form['ISBN'])
+    return "Working in progress"
 
 
 @app.route('/detail/<ISBN>', methods=['GET', 'POST'])
