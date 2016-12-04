@@ -3,47 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <title>Online Book Store</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type=text/css href="/static/main.css" />
 </head>
 <body>
+<div id="wrapper">
+    <!-- Header -->
+    <header id="header">
+			<div class="inner">
+				<!-- Logo -->
+				<a href="/" class="logo">
+				<span class="symbol"><img src="/static/images/logo.svg" alt="" /></span><span class="title">Online Bookstore</span>
+				</a>
+				</div>
+        </header>
+    <div id="main">
+        <div class="inner">
+            <header>
+                <h3>You're logged in as {{username}}</h3>
+            </header>
+            <section class="tiles">
+                <article class="style1">
+                    <span class="image">
+                        <img src="/static/images/pic01.jpg" alt="" />
+                    </span>
+                    <a href="admin">
+                        <h2>Manager portal</h2>
+                        <div class="content">
+                            <p>View manager portal.</p>
+                        </div>
+                    </a>
+                </article>
+                <article class="style2">
+                    <span class="image">
+                        <img src="/static/images/pic02.jpg" alt="" />
+                    </span>
+                    <a href="account">
+                        <h2>My account</h2>
+                        <div class="content">
+                            <p>View customer account.</p>
+                        </div>
+                    </a>
+                </article>
+                <article class="style3">
+                    <span class="image">
+                        <img src="/static/images/pic03.jpg" alt="" />
+                    </span>
+                    <a href="logout">
+                        <h2>Log out</h2>
+                        <div class="content">
+                            <p>Log out current account.</p>
+                        </div>
+                    </a>
+                </article>
+            </section>
+        </div>
+        <div class="inner">
+            <form action='search' method='POST'>
+                <div class="field half first">
+                    <input type='text' name='title' id='title' placeholder= 'Search by Title'>
+                </div>
+                <div class="field half">
+                    <input type='text' name='author' id='author' placeholder= 'Search by Author'>
+                </div>
+                <div class="field half first">
+                    <input type='text' name='publisher' id='publisher' placeholder= 'Search by Publisher'>
+                </div>
+                <div class="field half">
+                    <input type='text' name='subject' id='subject' placeholder= 'Search by Subject'>
+                </div>
+                <ul class="condition">
+                    <li><p>Condition</p></li>
 
-
-        <h1>Online Book Store</h1>
-        <h3>You're logged in as {{username}}</h3>
-
-        <button type="button"><a href="admin">Manager portal</a></button>
-        <button type="button"><a href="account">My Account</a></button>
-
-
-        <button type="button"><a href="logout">Log Out</a></button>
-
-        <form action='search' method='POST'>
-            <input type='text' name='title' id='title' placeholder= 'Search by Title'>
-            <input type='text' name='author' id='author' placeholder= 'Search by Author'>
-            <input type='text' name='publisher' id='publisher' placeholder= 'Search by Publisher'>
-            <input type='text' name='subject' id='subject' placeholder= 'Search by Subject'>
-
-            <p>Condition
-                <select name="condition" id="condition">
+                    <li><select name="condition" id="condition">
                     <option value="and">and</option>
                     <option value="or">or</option>
-                </select>
-                Sort by
-                <select name="sort_by" id="sort_by">
+                    </select></li>
+
+                    <li><p>Sort by</p></li>
+
+                    <li><select name="sort_by" id="sort_by">
                     <option value="year">Year</option>
                     <option value="score">Review Score</option>
-                </select>
-                Order
-                <select name="order" id="order">
+                    </select></li>
+
+                    <li><p>Order</p></li>
+
+                    <li><select name="order" id="order">
                     <option value="increasing">Increasing</option>
                     <option value="decreasing">Decreasing</option>
-                </select>
+                    </select></li>
 
-            </p>
-
-
-
-            <input type='submit' name='submit'>
+                </ul>
+                <ul class="action">
+                    <li><input type='submit' name='submit'></li>
+                </ul>
         </form>
+        </div>
+    </div>
+</div>
+
+
+		<!-- Scripts -->
+			<script src="/static/assets/js/jquery.min.js"></script>
+			<script src="/static/assets/js/skel.min.js"></script>
+			<script src="/static/assets/js/util.js"></script>
+			<script src="/static/assets/js/main.js"></script>
+
 
 
 
