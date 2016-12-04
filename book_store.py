@@ -378,6 +378,24 @@ def cart():
 @app.route('/account/checkout')
 @flask_login.login_required
 def checkout():
+    # check availability
+    cart_items = DB_Shopping_Cart.query.filter_by(username=flask_login.current_user.id).all()
+    for cart_item in cart_items:
+        book_item = DB_Book.query.filter_by(ISBN = cart_item.ISBN).first()
+        if book_item.copy < cart_item.quantity:
+            return "No enough stock for "+ book_item.title
+
+    # create order
+
+    # create order items
+
+    # update inventory
+
+
+
+
+
+
     return "Working in progress"
 
 
@@ -552,9 +570,24 @@ def addtocart():
     if copy > book_record.copy:
         return "Not enough stock!"
 
-    new_cart_record = DB_Shopping_Cart(flask_login.current_user.id, request.form['ISBN'], copy)
-    db.session.add(new_cart_record)
-    db.session.commit()
+    book_exist = False
+
+    all_cart_records = DB_Shopping_Cart.query.filter_by(username=flask_login.current_user.id).all()
+    for record in all_cart_records:
+        if record.ISBN == request.form['ISBN']:
+            book_exist = True
+    if book_exist:
+        print("Exist")
+        cart_record = DB_Shopping_Cart.query.filter_by(username=flask_login.current_user.id,ISBN=request.form['ISBN']).first()
+        print(cart_record.quantity)
+        cart_record.quantity += copy
+        db.session.commit()
+        print(cart_record.quantity)
+
+    else:
+        new_cart_record = DB_Shopping_Cart(flask_login.current_user.id, request.form['ISBN'], copy)
+        db.session.add(new_cart_record)
+        db.session.commit()
     return redirect(url_for('cart'))
 
 
