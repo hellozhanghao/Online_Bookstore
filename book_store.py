@@ -270,7 +270,6 @@ class BookItem(object):
         self.price = price
 
 
-
 class TopItemTable(Table):
     name = Col('')
     description = Col('Qty')
@@ -280,9 +279,6 @@ class TopItem(object):
     def __init__(self, name, description):
         self.name = name
         self.description = description
-
-
-
 
 
 # ***********************************************************************************
@@ -655,7 +651,7 @@ def statistics():
                     all_orders_this_month.add(order_on_date)
 
             # book mapping
-            popular_books={}
+            popular_books = {}
             for order in all_orders_this_month:
                 order_details = DB_Order_Detail.query.filter_by(order_id=order.order_id).all()
                 for order_detail in order_details:
@@ -667,20 +663,18 @@ def statistics():
 
             sorted_books = sorted(popular_books, key=popular_books.get, reverse=True)
 
-            if len(sorted_books)< m:
+            if len(sorted_books) < m:
                 m_sorted_books = sorted_books
             else:
                 m_sorted_books = sorted_books[:m]
 
-
             book_info = []
             for book in m_sorted_books:
-                book_info.append(TopItem(book.title,popular_books[book]))
+                book_info.append(TopItem(book.title, popular_books[book]))
             book_info_table = TopItemTable(book_info)
 
-
             # author mapping
-            popular_authors={}
+            popular_authors = {}
             for order in all_orders_this_month:
                 order_details = DB_Order_Detail.query.filter_by(order_id=order.order_id).all()
                 for order_detail in order_details:
@@ -690,19 +684,17 @@ def statistics():
                     else:
                         popular_authors[book.author] += order_detail.quantity
 
-            sorted_authors = sorted(popular_authors, key=popular_authors.get,reverse=True)
+            sorted_authors = sorted(popular_authors, key=popular_authors.get, reverse=True)
 
-            if len(sorted_authors)<m:
+            if len(sorted_authors) < m:
                 m_sorted_authors = sorted_authors
             else:
                 m_sorted_authors = sorted_authors[:m]
 
-            author_info =[]
+            author_info = []
             for author in m_sorted_authors:
-                author_info.append(TopItem(author,popular_authors[author]))
+                author_info.append(TopItem(author, popular_authors[author]))
             author_info_table = TopItemTable(author_info)
-
-
 
             # publisher mapping
             popular_publishers = {}
@@ -726,9 +718,6 @@ def statistics():
             for publisher in m_sorted_publishers:
                 publisher_info.append(TopItem(publisher, popular_publishers[publisher]))
             publisher_info_table = TopItemTable(publisher_info)
-
-
-
 
             return render_template('admin_statistics_view.html',
                                    m=m,
