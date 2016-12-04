@@ -3,15 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <title>Add number of copies</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/static/main.css" />
 </head>
 <body>
-
-                <!--Add Form-->
+<div id="wrapper">
+    <header id="header">
+        <div class="inner">
+			<!-- Logo -->
+			<a href="/" class="logo">
+				<span class="symbol"><img src="/static/images/logo.svg" alt="" /></span><span class="title">Online Bookstore</span>
+			</a>
+		</div>
+    </header>
+    <div id="main">
+        <div class="inner">
+            <!--Add Form-->
                 <form action='number' method='POST'>
+                    <div class="field half first">
                     <input type='text' name='ISBN' id='ISBN' value={{ISBN}}>
+                    </div>
+                    <div class="field half">
                     <input type='number' name='number' id='number' placeholder='Number of Copies'>
+                    </div>
+                    <ul class="actions">
                     <input type='submit' name='submit'>
+                    </ul>
                 </form>
+        </div>
+    </div>
+</div>
+
+
 
 </body>
 </html>
