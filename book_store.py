@@ -362,13 +362,23 @@ def cart():
     cart_info = []
 
     carts = DB_Shopping_Cart.query.filter_by(username=flask_login.current_user.id).all()
+    total_qty = 0
+    total_price = 0.0
     for cart in carts:
         book = DB_Book.query.filter_by(ISBN=cart.ISBN).first()
         cart_info.append(CartItem(cart.ISBN, book.title, cart.quantity))
+        total_qty += cart.quantity
+        total_price += float(book.price) * cart.quantity
 
     cart_info_table = CartTable(cart_info)
 
-    return render_template('account_cart.html', cart_info_table=cart_info_table)
+    return render_template('account_cart.html', cart_info_table=cart_info_table,
+                           total_qty=total_qty, total_price=round(total_price, 2))
+
+@app.route('/account/checkout')
+@flask_login.login_required
+def checkout():
+    return "Working in progress"
 
 
 # ******************************* Admin Pages ***************************************
@@ -450,7 +460,6 @@ def number():
 @flask_login.login_required
 def statistics():
     return render_template('admin_statistics.html')
-
 
 
 # ******************************* Shopping ^_^ ***************************************
@@ -543,7 +552,7 @@ def addtocart():
     if copy > book_record.copy:
         return "Not enough stock!"
 
-    new_cart_record = DB_Shopping_Cart(flask_login.current_user.id,request.form['ISBN'],copy)
+    new_cart_record = DB_Shopping_Cart(flask_login.current_user.id, request.form['ISBN'], copy)
     db.session.add(new_cart_record)
     db.session.commit()
     return redirect(url_for('cart'))
@@ -570,7 +579,6 @@ def detail(ISBN):
 
     return render_template('detail.html', title=book.title, ISBN=ISBN,
                            author=book.author, info_table=info_table)
-
 
 
 if __name__ == '__main__':
