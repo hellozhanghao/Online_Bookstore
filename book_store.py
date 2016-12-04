@@ -248,7 +248,68 @@ class BookItem(object):
 @app.route('/')
 @flask_login.login_required
 def index():
-    return render_template('index.html', username=flask_login.current_user.id)
+    # get books user purchased
+    orders = DB_Order.query.filter_by(username=flask_login.current_user.id).all()
+    book_purchased =set()
+    for order in orders:
+        order_details = DB_Order_Detail.query.filter_by(order_id=order.order_id).all()
+        for order_detail in order_details:
+            book = DB_Book.query.filter_by(ISBN = order_detail.ISBN).first()
+            if book not in book_purchased:
+                book_purchased.add(book)
+
+
+    # get my orders
+    my_orders = set()
+    for order in orders:
+        my_orders.add(order)
+
+    # get related orders
+    order_related = set()
+    for book in book_purchased:
+        order_details_related_to_book = DB_Order_Detail.query.filter_by(ISBN=book.ISBN).all()
+        for order_detail in order_details_related_to_book:
+            order = DB_Order.query.filter_by(order_id= order_detail.order_id).first()
+            if (order not in order_related) and (order not in my_orders):
+                order_related.add(order)
+
+    # map related order to related user
+    related_users = set()
+    for order in order_related:
+        user = DB_User.query.filter_by(username = order.username).first()
+        if user not in related_users:
+            related_users.add(user)
+
+    # get book purchased by others
+    book_purchased_by_others = set()
+    for user in related_users:
+        orders = DB_Order.query.filter_by(username=user.username).all()
+        for order in orders:
+            order_details = DB_Order_Detail.query.filter_by(order_id=order.order_id).all()
+            for order_detail in order_details:
+                book = DB_Book.query.filter_by(ISBN=order_detail.ISBN).first()
+                if book not in book_purchased_by_others:
+                    book_purchased_by_others.add(book)
+
+
+    # get recommended books
+    recommended_books=[]
+    for book in book_purchased_by_others:
+        if book not in book_purchased:
+            recommended_books.append(book)
+
+    book_recommentation=[]
+    for book in recommended_books:
+        book_recommentation.append(BookItem(book.ISBN,book.title,book.author,book.publisher,book.year,book.price))
+
+    book_recommentation_table = BookTable(book_recommentation)
+
+
+
+
+
+    return render_template('index.html', username=flask_login.current_user.id,
+                           book_recommentation_table=book_recommentation_table)
 
 
 @app.route('/login', methods=['GET', 'POST'])
