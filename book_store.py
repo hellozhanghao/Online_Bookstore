@@ -763,7 +763,7 @@ def search():
             input = []
 
             if title != "":
-                books_by_title = DB_Book.query.filter_by(title=title).all()
+                books_by_title = DB_Book.query.filter(DB_Book.title.contains(title)).all()
                 input.append(books_by_title)
             if author != "":
                 books_by_author = DB_Book.query.filter_by(author=author).all()

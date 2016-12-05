@@ -5,7 +5,7 @@ use book_store;
 
 insert into Book values('978-873625125','Harry Potter','zhanghao','SUTD Press','2016',4,25.65,'paperback','novel','key1 key2 key3');
 insert into Book values('978-873625123','Harry Potter','zhanghao','SUTD Press','2016',4,25.65,'paperback','novel','key1 key2 key3');
-insert into User values('admin','adminpass','credit_card','add','34534',true);
+insert into User values('zhanghao','password','4567 7876 8876 9876','8 Somapah Rd','85359434',true);
 
 
 select * from Book;
