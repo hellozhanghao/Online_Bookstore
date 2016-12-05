@@ -766,10 +766,10 @@ def search():
                 books_by_title = DB_Book.query.filter(DB_Book.title.contains(title)).all()
                 input.append(books_by_title)
             if author != "":
-                books_by_author = DB_Book.query.filter_by(author=author).all()
+                books_by_author = DB_Book.query.filter(DB_Book.author.contains(author)).all()
                 input.append(books_by_author)
             if publisher != "":
-                books_by_publisher = DB_Book.query.filter_by(publisher=publisher).all()
+                books_by_publisher = DB_Book.query.filter(DB_Book.publisher.contains(publisher)).all()
                 input.append(books_by_publisher)
             if books_by_subject != "":
                 books_by_subject = DB_Book.query.filter_by(subject=subject).all()
