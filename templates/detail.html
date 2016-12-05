@@ -26,26 +26,37 @@
         </div>
     </div>
     <div id="main2">
-        <div class="inner"><!--<input type="submit" name="submit" value="Add To Cart">-->
-        <!--<input type="submit" name="submit" value="Do Something Else">-->
-            <!--<input type="button" value="Sign up" onclick="location.href='/AddToCart?ISBN={{ISBN}}'">-->
+        <div class="inner">
         <form action='addtocart' method='POST'>
-            <div class="field half first">
-                Qty:
-            </div>
             <div class="field half">
+                Qty   :
                 <input type='number' name='copy' id='copy' placeholder= 'Number of Copy'/>
-            </div>
-            <div>
-                <input type="hidden" name="ISBN" value="{{ISBN}}">
-            </div>
-            <ul class="action">
                 <input type='submit' name='submit' value="Add To Cart"/>
-            </ul>
+                <input type="hidden" name="ISBN" value="{{ISBN}}">
 
+            </div>
         </form>
         </div>
+
+        <div class="inner">
+        <form action='review' method='POST'>
+            Review:
+                <input type='text' name='review' id='review' placeholder= 'My Review'/>
+                <input type="hidden" name="ISBN" value="{{ISBN}}">
+                <input type='submit' name='submit' value="Post Review"/>
+        </form>
+        </div>
+
     </div>
+
+
+
+
+
+
+
+
+
 </div>
 		<!-- Scripts -->
 			<script src="/static/assets/js/jquery.min.js"></script>
