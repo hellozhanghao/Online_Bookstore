@@ -17,11 +17,11 @@ db = SQLAlchemy(app)
 # ***********************************************************************************
 class DB_User(db.Model):
     __tablename__ = 'User'
-    username = db.Column('username', db.CHAR(20), primary_key=True)
-    password = db.Column('password', db.CHAR(20))
-    credit_card = db.Column('credit_card', db.CHAR(20))
-    address = db.Column('address', db.CHAR(20))
-    phone = db.Column('phone', db.CHAR(20))
+    username = db.Column('username', db.CHAR(100), primary_key=True)
+    password = db.Column('password', db.CHAR(100))
+    credit_card = db.Column('credit_card', db.CHAR(100))
+    address = db.Column('address', db.CHAR(100))
+    phone = db.Column('phone', db.CHAR(100))
     admin = db.Column('admin', db.BOOLEAN)
 
     def __init__(self, username, password, credit_card, address, phone, admin):
@@ -35,15 +35,15 @@ class DB_User(db.Model):
 
 class DB_Book(db.Model):
     __tablename__ = "Book"
-    ISBN = db.Column('ISBN', db.CHAR(14), primary_key=True)
-    title = db.Column('title', db.CHAR(40))
-    author = db.Column('author', db.CHAR(40))
-    publisher = db.Column('publisher', db.CHAR(40))
+    ISBN = db.Column('ISBN', db.CHAR(100), primary_key=True)
+    title = db.Column('title', db.CHAR(100))
+    author = db.Column('author', db.CHAR(100))
+    publisher = db.Column('publisher', db.CHAR(100))
     year = db.Column('year', db.INTEGER)
     copy = db.Column('copy', db.INTEGER)
     price = db.Column('price', db.FLOAT)
-    format = db.Column('format', db.CHAR(20))
-    subject = db.Column('subject', db.CHAR(20))
+    format = db.Column('format', db.CHAR(100))
+    subject = db.Column('subject', db.CHAR(100))
     keywords = db.Column('keywords', db.CHAR(100))
 
     def __init__(self, ISBN, title, author, publisher, year, copy, price, format, subject, keywords):
@@ -256,7 +256,6 @@ class BookTable(Table):
     publisher = Col('Publisher')
     year = Col('Year')
     price = Col('Price')
-    # add = ButtonCol('Add To Cart', 'cart', url_kwargs=dict(ISBN='ISBN'))
     detial = ButtonCol('View Details', 'search', url_kwargs=dict(ISBN='ISBN'))
 
 
@@ -279,6 +278,30 @@ class TopItem(object):
     def __init__(self, name, description):
         self.name = name
         self.description = description
+
+class ReviewTable(Table):
+    review_id = Col('Review ID')
+    user = Col('User')
+    text = Col('Description')
+    score = Col('Review Score')
+    date = Col('Date Reviewed')
+    veryuseful = Col('Very Useful')
+    useful = Col('Useful')
+    useless = Col('Useless')
+    comment = ButtonCol('Comment','comment',url_kwargs=dict(review_id='review_id'))
+
+class ReviewItem(object):
+    def __init__(self, review_id,user, text, score,date, veryuseful, useful, useless):
+        self.review_id = review_id
+        self.user = user
+        self.text = text
+        self.score = score
+        self.veryuseful = veryuseful
+        self.useful = useful
+        self.useless = useless
+        self.date = date
+
+
 
 
 # ***********************************************************************************
@@ -772,7 +795,7 @@ def search():
                 books_by_publisher = DB_Book.query.filter(DB_Book.publisher.contains(publisher)).all()
                 input.append(books_by_publisher)
             if books_by_subject != "":
-                books_by_subject = DB_Book.query.filter_by(subject=subject).all()
+                books_by_subject = DB_Book.query.filter(DB_Book.subject.contains(subject)).all()
                 input.append(books_by_subject)
 
             if condition == "and":
@@ -814,6 +837,9 @@ def search():
             book_info_table = BookTable(book_info)
             return render_template('search.html', book_info_table=book_info_table)
         else:
+
+
+
             return redirect(url_for('detail', ISBN=request.args['ISBN']))
 
 
@@ -871,13 +897,55 @@ def detail(ISBN):
 
     info_table = ItemTable(info)
 
+    review_info =[]
+    reviews = DB_Review.query.filter_by(ISBN=ISBN).all()
+
+    for review in reviews:
+        veryuseful = 0
+        useful = 0
+        useless = 0
+
+
+        review_info.append(ReviewItem(review.review_id,
+                                      review.username,
+                                      review.text,
+                                      review.score,
+                                      review.date,
+                                      veryuseful,
+                                      useful,
+                                      useless))
+
+    review_info_table = ReviewTable(review_info)
+
     return render_template('detail.html', title=book.title, ISBN=ISBN,
-                           author=book.author, info_table=info_table)
+                           author=book.author, info_table=info_table, review_info_table=review_info_table)
 
 
 # ******************************* Review and Comment ***********************************
+@app.route('/review', methods=['GET','POST'])
+@flask_login.login_required
+def review():
+    ISBN = request.form['ISBN']
+
+    previous_review =DB_Review.query.filter_by(username=flask_login.current_user.id,ISBN=ISBN).first()
+    if previous_review is not None:
+        return "You have previously reviewed this book! "
 
 
+    score = request.form['score']
+    text = request.form['review']
+    new_review = DB_Review(flask_login.current_user.id,ISBN,score,text,datetime.date.today())
+    db.session.add(new_review)
+    db.session.commit()
+
+
+    return redirect(url_for('detail', ISBN=ISBN))
+
+
+@app.route('/comment',methods=['GET','POST'])
+@flask_login.login_required
+def comment():
+    return "Test"
 
 
 if __name__ == '__main__':

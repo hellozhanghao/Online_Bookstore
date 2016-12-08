@@ -25,29 +25,35 @@
             <p>{{info_table}}</p>
         </div>
     </div>
+
+
+
     <div id="main2">
         <div class="inner">
         <form action='addtocart' method='POST'>
             <div class="field half">
                 Qty   :
+                <input type="hidden" name="ISBN" value="{{ISBN}}">
                 <input type='number' name='copy' id='copy' placeholder= 'Number of Copy'/>
                 <input type='submit' name='submit' value="Add To Cart"/>
-                <input type="hidden" name="ISBN" value="{{ISBN}}">
-
             </div>
         </form>
         </div>
+    </div>
+    <h2>Reviews by user</h2>
+        {{review_info_table}}
 
-        <div class="inner">
-        <form action='review' method='POST'>
-            Review:
-                <input type='text' name='review' id='review' placeholder= 'My Review'/>
-                <input type="hidden" name="ISBN" value="{{ISBN}}">
+
+
+
+        <form action='/review' method='POST'>
+                Review:
+                <input type="hidden" name="ISBN" value="{{ISBN}}"/>
+                <input type="number" name="score" id='score' placeholder="My Review Score"/>
+                <input type='text' name='review' id='review' placeholder= 'Anything you want to say about the book'/>
+
                 <input type='submit' name='submit' value="Post Review"/>
         </form>
-        </div>
-
-    </div>
 
 </div>
 		<!-- Scripts -->
