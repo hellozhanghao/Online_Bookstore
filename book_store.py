@@ -286,21 +286,17 @@ class ReviewTable(Table):
     text = Col('Description')
     score = Col('Review Score')
     date = Col('Date Reviewed')
-    veryuseful = Col('Very Useful')
-    useful = Col('Useful')
-    useless = Col('Useless')
+    usefulness = Col('Usefulness')
     comment = ButtonCol('Comment', 'comment', url_kwargs=dict(review_id='review_id'))
 
 
 class ReviewItem(object):
-    def __init__(self, review_id, user, text, score, date, veryuseful, useful, useless):
+    def __init__(self, review_id, user, text, score, date, usefulness):
         self.review_id = review_id
         self.user = user
         self.text = text
         self.score = score
-        self.veryuseful = veryuseful
-        self.useful = useful
-        self.useless = useless
+        self.usefulness = usefulness
         self.date = date
 
 
@@ -312,10 +308,11 @@ class MYReviewTable(Table):
     veryuseful = Col('Very Useful')
     useful = Col('Useful')
     useless = Col('Useless')
+    usefulness = Col ('Usefulness score')
 
 
 class MYReviewItem(object):
-    def __init__(self, title, text, score, date, veryuseful, useful, useless):
+    def __init__(self, title, text, score, date, veryuseful, useful, useless,usefulness):
         self.title = title
         self.text = text
         self.score = score
@@ -323,6 +320,7 @@ class MYReviewItem(object):
         self.useful = useful
         self.useless = useless
         self.date = date
+        self.usefulness = usefulness
 
 
 # ***********************************************************************************
@@ -443,7 +441,7 @@ def login():
                 user.id = username
                 flask_login.login_user(user)
                 return redirect(url_for('index'))
-    return 'Bad login'
+    return render_template('generic.html',msg="Bad Login")
 
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -469,7 +467,7 @@ def signup():
             flask_login.login_user(user)
             return redirect(url_for('index'))
 
-    return 'Bad Sign Up! Username exist'
+    return render_template('generic.html',msg='Bad Sign Up! Username exist')
 
 
 @app.route('/logout')
@@ -600,13 +598,24 @@ def reviews():
         useful = 0
         useless = 0
 
+        comments = DB_Comment.query.filter_by(review_id=review.review_id).all()
+        for comment in comments:
+            if comment.usefulness == 'very useful':
+                veryuseful += 1
+            if comment.usefulness == 'useful':
+                useful += 1
+            if comment.usefulness == 'useless':
+                useless += 1
+
+        usefulness = (veryuseful *2.0 + useful*1.0) /len(comments)
+
         review_info.append(MYReviewItem(book.title,
                                         review.text,
                                         review.score,
                                         review.date,
                                         veryuseful,
                                         useful,
-                                        useless))
+                                        useless,usefulness))
 
     review_info_table = MYReviewTable(review_info)
     return render_template('account_reviews.html', review_info_table=review_info_table)
@@ -620,7 +629,7 @@ def admin():
     db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
     if db_user.admin:
         return render_template('admin.html', username=flask_login.current_user.id)
-    return render_template('access_denied.html')
+    return render_template('generic.html',msg ="Access denied!")
 
 
 @app.route('/admin/inventory', methods=['GET', 'POST'])
@@ -644,7 +653,7 @@ def inventory():
             inventory_info_table = InventoryTable(inventory_info)
             return render_template('admin_inventory.html', inventory_info_table=inventory_info_table)
 
-        return render_template('access_denied.html')
+        return render_template('generic.html',msg="Access denied!")
 
     if request.method == 'POST':
         ISBN = request.form['ISBN']
@@ -675,7 +684,7 @@ def add(ISBN):
     db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
     if db_user.admin:
         return render_template('admin_inventory_add.html', ISBN=ISBN)
-    return render_template('access_denied.html')
+    return render_template('generic.html',msg ='access denied!')
 
 
 @app.route('/admin/inventory/add/number', methods=['GET', 'POST'])
@@ -691,7 +700,7 @@ def number():
             db_book.copy += number
             db.session.commit()
         return redirect(url_for('inventory'))
-    return render_template('access_denied.html')
+    return render_template('generic.html',msg='Access denied!')
 
 
 @app.route('/admin/statistics', methods=['GET', 'POST'])
@@ -795,7 +804,7 @@ def statistics():
                                    book_info_table=book_info_table,
                                    author_info_table=author_info_table,
                                    publisher_info_table=publisher_info_table)
-    return render_template('access_denied.html')
+    return render_template('generic.html',msg='access denied!')
 
 
 # @app.route('/admin/statistics/view', methods= ['GET', 'POST'])
@@ -805,7 +814,7 @@ def statistics():
 #     if db_user.admin:
 #         if request.method =='POST':
 #             return "hahah"
-#     return render_template('access_denied.html')
+#     return render_template('generic.html')
 
 
 
@@ -958,14 +967,18 @@ def detail(ISBN):
             if comment.usefulness == 'useless':
                 useless +=1
 
+        if len(comments)!= 0:
+            usefulness = (veryuseful *2.0 + useful*1.0) /len(comments)
+        else:
+            usefulness = 0.0
+
+
         review_info.append(ReviewItem(review.review_id,
                                       review.username,
                                       review.text,
                                       review.score,
                                       review.date,
-                                      veryuseful,
-                                      useful,
-                                      useless))
+                                      usefulness))
 
     review_info_table = ReviewTable(review_info)
 
