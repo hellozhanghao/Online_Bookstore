@@ -279,6 +279,7 @@ class TopItem(object):
         self.name = name
         self.description = description
 
+
 class ReviewTable(Table):
     review_id = Col('Review ID')
     user = Col('User')
@@ -288,10 +289,11 @@ class ReviewTable(Table):
     veryuseful = Col('Very Useful')
     useful = Col('Useful')
     useless = Col('Useless')
-    comment = ButtonCol('Comment','comment',url_kwargs=dict(review_id='review_id'))
+    comment = ButtonCol('Comment', 'comment', url_kwargs=dict(review_id='review_id'))
+
 
 class ReviewItem(object):
-    def __init__(self, review_id,user, text, score,date, veryuseful, useful, useless):
+    def __init__(self, review_id, user, text, score, date, veryuseful, useful, useless):
         self.review_id = review_id
         self.user = user
         self.text = text
@@ -302,6 +304,25 @@ class ReviewItem(object):
         self.date = date
 
 
+class MYReviewTable(Table):
+    title = Col('Title')
+    text = Col('Description')
+    score = Col('Score')
+    date = Col('Date')
+    veryuseful = Col('Very Useful')
+    useful = Col('Useful')
+    useless = Col('Useless')
+
+
+class MYReviewItem(object):
+    def __init__(self, title, text, score, date, veryuseful, useful, useless):
+        self.title = title
+        self.text = text
+        self.score = score
+        self.veryuseful = veryuseful
+        self.useful = useful
+        self.useless = useless
+        self.date = date
 
 
 # ***********************************************************************************
@@ -564,6 +585,31 @@ def checkout():
         db.session.delete(cart_item)
         db.session.commit()
     return redirect(url_for('order'))
+
+
+@app.route('/account/reviews')
+@flask_login.login_required
+def reviews():
+    review_info = []
+    reviews = DB_Review.query.filter_by(username=flask_login.current_user.id).all()
+
+    for review in reviews:
+        book = DB_Book.query.filter_by(ISBN=review.ISBN).first()
+
+        veryuseful = 0
+        useful = 0
+        useless = 0
+
+        review_info.append(MYReviewItem(book.title,
+                                        review.text,
+                                        review.score,
+                                        review.date,
+                                        veryuseful,
+                                        useful,
+                                        useless))
+
+    review_info_table = MYReviewTable(review_info)
+    return render_template('account_reviews.html', review_info_table=review_info_table)
 
 
 # ******************************* Admin Pages ***************************************
@@ -838,8 +884,6 @@ def search():
             return render_template('search.html', book_info_table=book_info_table)
         else:
 
-
-
             return redirect(url_for('detail', ISBN=request.args['ISBN']))
 
 
@@ -897,7 +941,7 @@ def detail(ISBN):
 
     info_table = ItemTable(info)
 
-    review_info =[]
+    review_info = []
     reviews = DB_Review.query.filter_by(ISBN=ISBN).all()
 
     for review in reviews:
@@ -905,6 +949,14 @@ def detail(ISBN):
         useful = 0
         useless = 0
 
+        comments = DB_Comment.query.filter_by(review_id = review.review_id).all()
+        for comment in comments:
+            if comment.usefulness =='very useful':
+                veryuseful +=1
+            if comment.usefulness == 'useful':
+                useful += 1
+            if comment.usefulness == 'useless':
+                useless +=1
 
         review_info.append(ReviewItem(review.review_id,
                                       review.username,
@@ -922,30 +974,67 @@ def detail(ISBN):
 
 
 # ******************************* Review and Comment ***********************************
-@app.route('/review', methods=['GET','POST'])
+@app.route('/review', methods=['GET', 'POST'])
 @flask_login.login_required
 def review():
     ISBN = request.form['ISBN']
 
-    previous_review =DB_Review.query.filter_by(username=flask_login.current_user.id,ISBN=ISBN).first()
+    previous_review = DB_Review.query.filter_by(username=flask_login.current_user.id, ISBN=ISBN).first()
     if previous_review is not None:
         return "You have previously reviewed this book! "
 
+    # check if user bought this book
+    purchased = False
+    orders = DB_Order.query.filter_by(username=flask_login.current_user.id).all()
+    for order in orders:
+        order_details = DB_Order_Detail.query.filter_by(order_id=order.order_id).all()
+        for order_detail in order_details:
+            if ISBN == order_detail.ISBN:
+                purchased = True
+                break
+
+    if not purchased:
+        return "You need to purchase this book before review"
 
     score = request.form['score']
     text = request.form['review']
-    new_review = DB_Review(flask_login.current_user.id,ISBN,score,text,datetime.date.today())
+    new_review = DB_Review(flask_login.current_user.id, ISBN, score, text, datetime.date.today())
     db.session.add(new_review)
     db.session.commit()
-
 
     return redirect(url_for('detail', ISBN=ISBN))
 
 
-@app.route('/comment',methods=['GET','POST'])
+@app.route('/comment', methods=['GET', 'POST'])
 @flask_login.login_required
 def comment():
-    return "Test"
+    review_id = request.args['review_id']
+    review = DB_Review.query.filter_by(review_id=review_id).first()
+    book = DB_Book.query.filter_by(ISBN=review.ISBN).first()
+
+    if review.username == flask_login.current_user.id:
+        return "You can't comment on your own review"
+
+    return render_template('comment.html', review_id=review_id, book_title=book.title, ISBN=book.ISBN)
+
+
+@app.route('/comment/post', methods=['GET', 'POST'])
+@flask_login.login_required
+def post_comment():
+    username = flask_login.current_user.id
+    review_id = request.form['review_id']
+    usefulness = request.form['usefulness']
+
+
+    comment = DB_Comment.query.filter_by(username=username, review_id=review_id).first()
+    if comment is not None:
+        return "You already commented on this review"
+
+    comment = DB_Comment(username, review_id, usefulness)
+    db.session.add(comment)
+    db.session.commit()
+
+    return redirect(url_for('detail', ISBN=request.form['ISBN']))
 
 
 if __name__ == '__main__':

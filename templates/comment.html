@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Comment</title>
+</head>
+<body>
+        <h1>Comment</h1>
+
+        <p> I find this review of book {{book_title}} is  </p>
+            <form action='comment/post' method='POST'>
+                    <input type='hidden' name='ISBN' id='ISBN' value={{ISBN}}>
+                    <input type='hidden' name='review_id' id='review_id' value={{review_id}}>
+                    <select name="usefulness" id="usefulness">
+                        <option value="very useful">2-Very Useful</option>
+                        <option value="useful">1-Useful</option>
+                        <option value="useless">0-Useless</option>
+
+                    </select>
+                    <input type='submit' name='submit'>
+            </form>
+
+
+</body>
+</html>
