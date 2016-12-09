@@ -650,7 +650,7 @@ def reviews():
                                         useless, usefulness))
 
     review_info_table = MYReviewTable(review_info)
-    return render_template('account_reviews.html', review_info_table=review_info_table)
+    return render_template('table_template.html', page_title ='My Reviews',table=review_info_table)
 
 
 @app.route('/account/comment')
@@ -670,7 +670,7 @@ def my_comments():
 
     comments_info_table = MYCommentTable(comments_info)
 
-    return render_template('account_comments.html', comments_info_table=comments_info_table)
+    return render_template('table_template.html', page_title = "My Comments",table=comments_info_table)
 
 
 @app.route('/account/books')
@@ -708,7 +708,7 @@ def my_books():
     book_info_table = BookTable(book_info)
 
 
-    return render_template('account_books.html',book_info_table=book_info_table)
+    return render_template('table_template.html',page_title="My Books",table=book_info_table)
 
 
 # ******************************* Admin Pages ***************************************
@@ -1140,7 +1140,7 @@ def review_detail():
                                       avg_score[sorted_avg_score[i]]))
 
     review_info_table = ReviewTable(review_info)
-    return render_template('review_detail.html', review_info_table=review_info_table, n=n)
+    return render_template('table_template.html', page_title="User Reviews",table=review_info_table)
 
 
 @app.route('/comment', methods=['GET', 'POST'])
