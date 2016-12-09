@@ -527,8 +527,8 @@ def account():
                     Item('Phone', db_user.phone)]
 
     account_info_table = ItemTable(account_info)
-    return render_template('account_profile.html',
-                           account_info_table=account_info_table)
+    return render_template('table_template.html',page_title="My Profile",
+                           table=account_info_table)
 
 
 @app.route('/account/order')
@@ -554,7 +554,7 @@ def order():
             entry += 1
 
     order_info_table = OrderTable(order_info)
-    return render_template('account_order.html', order_info_table=order_info_table)
+    return render_template('table_template.html', page_title="My Order",table=order_info_table)
 
 
 @app.route('/account/cart')
@@ -673,6 +673,44 @@ def my_comments():
     return render_template('account_comments.html', comments_info_table=comments_info_table)
 
 
+@app.route('/account/books')
+@flask_login.login_required
+def my_books():
+    books=set()
+    orders = DB_Order.query.filter_by(username=flask_login.current_user.id).all()
+    for order in orders:
+        order_details = DB_Order_Detail.query.filter_by(order_id= order.order_id).all()
+        for order_detail in order_details:
+            book = DB_Book.query.filter_by(ISBN=order_detail.ISBN).first()
+            if book not in books:
+                books.add(book)
+
+    book_info = []
+    for book in books:
+        # todo add score
+
+        avg_score = 0.0
+        reviews = DB_Review.query.filter_by(ISBN=book.ISBN).all()
+        for review in reviews:
+            avg_score += review.score
+
+        if len(reviews) != 0:
+            avg_score /= len(reviews)
+
+        book_info.append(BookItem(book.ISBN,
+                                  book.title,
+                                  book.author,
+                                  book.publisher,
+                                  book.year,
+                                  book.price,
+                                  avg_score))
+
+    book_info_table = BookTable(book_info)
+
+
+    return render_template('account_books.html',book_info_table=book_info_table)
+
+
 # ******************************* Admin Pages ***************************************
 
 @app.route('/admin')
@@ -763,7 +801,10 @@ def statistics():
         if request.method == 'GET':
             return render_template('admin_statistics.html')
         if request.method == 'POST':
-            m = int(request.form['m'])
+            try:
+                m = int(request.form['m'])
+            except:
+                m = 10
             current_year = datetime.date.today().year
             current_month = datetime.date.today().month
             days = []
