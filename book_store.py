@@ -586,7 +586,7 @@ def checkout():
     for cart_item in cart_items:
         book_item = DB_Book.query.filter_by(ISBN=cart_item.ISBN).first()
         if book_item.copy < cart_item.quantity:
-            return "No enough stock for " + book_item.title
+            return render_template('generic.html',msg="Not enough stock for one of the book")
 
     # update inventory
     for cart_item in cart_items:
@@ -636,7 +636,10 @@ def reviews():
             if comment.usefulness == 'useless':
                 useless += 1
 
-        usefulness = (veryuseful * 2.0 + useful * 1.0) / len(comments)
+        if len(comments)==0:
+            usefulness = 0.0
+        else:
+            usefulness = (veryuseful * 2.0 + useful * 1.0) / len(comments)
 
         review_info.append(MYReviewItem(book.title,
                                         review.text,
@@ -708,7 +711,7 @@ def inventory():
         ISBN = request.form['ISBN']
         db_book = DB_Book.query.filter_by(ISBN=ISBN).first()
         if db_book is not None:
-            return "Book exist"
+            return render_template('generic.html',msg="Book exist")
         else:
             new_book = DB_Book(ISBN,
                                request.form['title'],
@@ -970,7 +973,7 @@ def addtocart():
     # load Book
     book_record = DB_Book.query.filter_by(ISBN=request.form['ISBN']).first()
     if copy > book_record.copy:
-        return "Not enough stock!"
+        return render_template('generic.html',msg="Not enough stock!!")
 
     book_exist = False
 
@@ -1025,7 +1028,7 @@ def review():
 
     previous_review = DB_Review.query.filter_by(username=flask_login.current_user.id, ISBN=ISBN).first()
     if previous_review is not None:
-        return "You have previously reviewed this book! "
+        return render_template('generic.html',msg="You have previously reviewed this book! ")
 
     # check if user bought this book
     purchased = False
@@ -1038,7 +1041,7 @@ def review():
                 break
 
     if not purchased:
-        return "You need to purchase this book before review"
+        return render_template('generic.html',msg="You need to purchase this book before review")
 
     score = request.form['score']
     text = request.form['review']
@@ -1107,7 +1110,7 @@ def comment():
     book = DB_Book.query.filter_by(ISBN=review.ISBN).first()
 
     if review.username == flask_login.current_user.id:
-        return "You can't comment on your own review"
+        return render_template('generic.html',msg="You can't comment on your own review")
 
     return render_template('comment.html', review_id=review_id, book_title=book.title, ISBN=book.ISBN)
 
@@ -1121,7 +1124,7 @@ def post_comment():
 
     comment = DB_Comment.query.filter_by(username=username, review_id=review_id).first()
     if comment is not None:
-        return "You already commented on this review"
+        return render_template('generic.html',msg="You already commented on this review")
 
     comment = DB_Comment(username, review_id, usefulness)
     db.session.add(comment)
