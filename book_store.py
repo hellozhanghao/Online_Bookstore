@@ -256,17 +256,19 @@ class BookTable(Table):
     publisher = Col('Publisher')
     year = Col('Year')
     price = Col('Price')
+    score = Col('Score')
     detial = ButtonCol('View Details', 'search', url_kwargs=dict(ISBN='ISBN'))
 
 
 class BookItem(object):
-    def __init__(self, ISBN, title, author, publisher, year, price, ):
+    def __init__(self, ISBN, title, author, publisher, year, price, score):
         self.ISBN = ISBN
         self.title = title
         self.author = author
         self.publisher = publisher
         self.year = year
         self.price = price
+        self.score = score
 
 
 class TopItemTable(Table):
@@ -326,19 +328,18 @@ class MYReviewItem(object):
 class MYCommentTable(Table):
     title = Col('Title')
     text = Col('Description')
-    by = Col ('By')
+    by = Col('By')
     score = Col('Score')
     mycomment = Col('My Comment')
 
 
 class MYCommentItem(object):
-    def __init__(self, title, text, by,  score, mycomment):
+    def __init__(self, title, text, by, score, mycomment):
         self.title = title
         self.text = text
         self.by = by
         self.score = score
         self.mycomment = mycomment
-
 
 
 # ***********************************************************************************
@@ -434,7 +435,17 @@ def index():
     # generate table
     book_recommentation = []
     for book in ordered_books:
-        book_recommentation.append(BookItem(book.ISBN, book.title, book.author, book.publisher, book.year, book.price))
+        # todo add score
+        avg_score = 0.0
+        reviews = DB_Review.query.filter_by(ISBN=book.ISBN).all()
+        for review in reviews:
+            avg_score += review.score
+
+        if len(reviews)!= 0:
+            avg_score /= len(reviews)
+
+        book_recommentation.append(
+            BookItem(book.ISBN, book.title, book.author, book.publisher, book.year, book.price, avg_score))
 
     book_recommentation_table = BookTable(book_recommentation)
 
@@ -642,13 +653,12 @@ def reviews():
 @app.route('/account/comment')
 @flask_login.login_required
 def my_comments():
+    comments_info = []
 
-    comments_info=[]
-
-    comments = DB_Comment.query.filter_by(username = flask_login.current_user.id).all()
+    comments = DB_Comment.query.filter_by(username=flask_login.current_user.id).all()
     for comment in comments:
-        review = DB_Review.query.filter_by(review_id = comment.review_id).first()
-        book = DB_Book.query.filter_by(ISBN = review.ISBN).first()
+        review = DB_Review.query.filter_by(review_id=comment.review_id).first()
+        book = DB_Book.query.filter_by(ISBN=review.ISBN).first()
         comments_info.append(MYCommentItem(book.title,
                                            review.text,
                                            review.username,
@@ -657,8 +667,7 @@ def my_comments():
 
     comments_info_table = MYCommentTable(comments_info)
 
-
-    return render_template('account_comments.html',comments_info_table = comments_info_table)
+    return render_template('account_comments.html', comments_info_table=comments_info_table)
 
 
 # ******************************* Admin Pages ***************************************
@@ -847,17 +856,6 @@ def statistics():
     return render_template('generic.html', msg='access denied!')
 
 
-# @app.route('/admin/statistics/view', methods= ['GET', 'POST'])
-# @flask_login.login_required
-# def view():
-#     db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
-#     if db_user.admin:
-#         if request.method =='POST':
-#             return "hahah"
-#     return render_template('generic.html')
-
-
-
 # ******************************* Shopping ^_^ ***************************************
 
 
@@ -917,17 +915,42 @@ def search():
                 else:
                     books.sort(key=lambda x: x.year, reverse=True)
             else:
-                # todo add score
-                print()
+                book_dict={}
+                for book in books:
+                    avg_score = 0.0
+                    reviews = DB_Review.query.filter_by(ISBN=book.ISBN).all()
+                    for review in reviews:
+                        avg_score += review.score
+
+                    if len(reviews) != 0:
+                        avg_score /= len(reviews)
+
+                    book_dict[book] = avg_score
+
+                if order =='increasing':
+                    books = sorted(book_dict, key=book_dict.get)
+                else:
+                    books = sorted(book_dict, key=book_dict.get,reverse=True)
 
             book_info = []
             for book in books:
+                # todo add score
+
+                avg_score = 0.0
+                reviews = DB_Review.query.filter_by(ISBN=book.ISBN).all()
+                for review in reviews:
+                    avg_score += review.score
+
+                if len(reviews) != 0:
+                    avg_score /= len(reviews)
+
                 book_info.append(BookItem(book.ISBN,
                                           book.title,
                                           book.author,
                                           book.publisher,
                                           book.year,
-                                          book.price))
+                                          book.price,
+                                          avg_score))
 
             book_info_table = BookTable(book_info)
             return render_template('search.html', book_info_table=book_info_table)
@@ -1029,12 +1052,10 @@ def review():
 @app.route('/review_detail', methods=['GET', 'POST'])
 @flask_login.login_required
 def review_detail():
-
     ISBN = request.form['ISBN']
     n = request.form['number']
     review_info = []
     reviews = DB_Review.query.filter_by(ISBN=ISBN).all()
-
 
     avg_score = {}
     for review in reviews:
@@ -1057,18 +1078,16 @@ def review_detail():
         else:
             usefulness = 0.0
 
-        avg_score[review]=usefulness
+        avg_score[review] = usefulness
 
-
-    sorted_avg_score = sorted(avg_score,key = avg_score.get,reverse=True)
-    if n =='':
+    sorted_avg_score = sorted(avg_score, key=avg_score.get, reverse=True)
+    if n == '':
         n = len(sorted_avg_score)
     else:
         n = int(n)
-    if len(sorted_avg_score) < n :
-        n=len(sorted_avg_score)
+    if len(sorted_avg_score) < n:
+        n = len(sorted_avg_score)
     for i in range(n):
-
         review_info.append(ReviewItem(sorted_avg_score[i].review_id,
                                       sorted_avg_score[i].username,
                                       sorted_avg_score[i].text,
@@ -1077,7 +1096,7 @@ def review_detail():
                                       avg_score[sorted_avg_score[i]]))
 
     review_info_table = ReviewTable(review_info)
-    return render_template('review_detail.html',review_info_table=review_info_table,n=n)
+    return render_template('review_detail.html', review_info_table=review_info_table, n=n)
 
 
 @app.route('/comment', methods=['GET', 'POST'])
