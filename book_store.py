@@ -323,6 +323,24 @@ class MYReviewItem(object):
         self.usefulness = usefulness
 
 
+class MYCommentTable(Table):
+    title = Col('Title')
+    text = Col('Description')
+    by = Col ('By')
+    score = Col('Score')
+    mycomment = Col('My Comment')
+
+
+class MYCommentItem(object):
+    def __init__(self, title, text, by,  score, mycomment):
+        self.title = title
+        self.text = text
+        self.by = by
+        self.score = score
+        self.mycomment = mycomment
+
+
+
 # ***********************************************************************************
 # ------------------------------------Flask------------------------------------------
 # ***********************************************************************************
@@ -619,6 +637,28 @@ def reviews():
 
     review_info_table = MYReviewTable(review_info)
     return render_template('account_reviews.html', review_info_table=review_info_table)
+
+
+@app.route('/account/comment')
+@flask_login.login_required
+def my_comments():
+
+    comments_info=[]
+
+    comments = DB_Comment.query.filter_by(username = flask_login.current_user.id).all()
+    for comment in comments:
+        review = DB_Review.query.filter_by(review_id = comment.review_id).first()
+        book = DB_Book.query.filter_by(ISBN = review.ISBN).first()
+        comments_info.append(MYCommentItem(book.title,
+                                           review.text,
+                                           review.username,
+                                           review.score,
+                                           comment.usefulness))
+
+    comments_info_table = MYCommentTable(comments_info)
+
+
+    return render_template('account_comments.html',comments_info_table = comments_info_table)
 
 
 # ******************************* Admin Pages ***************************************
@@ -1020,9 +1060,7 @@ def review_detail():
         avg_score[review]=usefulness
 
 
-    print(avg_score)
     sorted_avg_score = sorted(avg_score,key = avg_score.get,reverse=True)
-    print(sorted_avg_score)
     if n =='':
         n = len(sorted_avg_score)
     else:
