@@ -308,11 +308,11 @@ class MYReviewTable(Table):
     veryuseful = Col('Very Useful')
     useful = Col('Useful')
     useless = Col('Useless')
-    usefulness = Col ('Usefulness score')
+    usefulness = Col('Usefulness score')
 
 
 class MYReviewItem(object):
-    def __init__(self, title, text, score, date, veryuseful, useful, useless,usefulness):
+    def __init__(self, title, text, score, date, veryuseful, useful, useless, usefulness):
         self.title = title
         self.text = text
         self.score = score
@@ -441,7 +441,7 @@ def login():
                 user.id = username
                 flask_login.login_user(user)
                 return redirect(url_for('index'))
-    return render_template('generic.html',msg="Bad Login")
+    return render_template('generic.html', msg="Bad Login")
 
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -467,7 +467,7 @@ def signup():
             flask_login.login_user(user)
             return redirect(url_for('index'))
 
-    return render_template('generic.html',msg='Bad Sign Up! Username exist')
+    return render_template('generic.html', msg='Bad Sign Up! Username exist')
 
 
 @app.route('/logout')
@@ -607,7 +607,7 @@ def reviews():
             if comment.usefulness == 'useless':
                 useless += 1
 
-        usefulness = (veryuseful *2.0 + useful*1.0) /len(comments)
+        usefulness = (veryuseful * 2.0 + useful * 1.0) / len(comments)
 
         review_info.append(MYReviewItem(book.title,
                                         review.text,
@@ -615,7 +615,7 @@ def reviews():
                                         review.date,
                                         veryuseful,
                                         useful,
-                                        useless,usefulness))
+                                        useless, usefulness))
 
     review_info_table = MYReviewTable(review_info)
     return render_template('account_reviews.html', review_info_table=review_info_table)
@@ -629,7 +629,7 @@ def admin():
     db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
     if db_user.admin:
         return render_template('admin.html', username=flask_login.current_user.id)
-    return render_template('generic.html',msg ="Access denied!")
+    return render_template('generic.html', msg="Access denied!")
 
 
 @app.route('/admin/inventory', methods=['GET', 'POST'])
@@ -653,7 +653,7 @@ def inventory():
             inventory_info_table = InventoryTable(inventory_info)
             return render_template('admin_inventory.html', inventory_info_table=inventory_info_table)
 
-        return render_template('generic.html',msg="Access denied!")
+        return render_template('generic.html', msg="Access denied!")
 
     if request.method == 'POST':
         ISBN = request.form['ISBN']
@@ -684,7 +684,7 @@ def add(ISBN):
     db_user = DB_User.query.filter_by(username=flask_login.current_user.id).first()
     if db_user.admin:
         return render_template('admin_inventory_add.html', ISBN=ISBN)
-    return render_template('generic.html',msg ='access denied!')
+    return render_template('generic.html', msg='access denied!')
 
 
 @app.route('/admin/inventory/add/number', methods=['GET', 'POST'])
@@ -700,7 +700,7 @@ def number():
             db_book.copy += number
             db.session.commit()
         return redirect(url_for('inventory'))
-    return render_template('generic.html',msg='Access denied!')
+    return render_template('generic.html', msg='Access denied!')
 
 
 @app.route('/admin/statistics', methods=['GET', 'POST'])
@@ -804,7 +804,7 @@ def statistics():
                                    book_info_table=book_info_table,
                                    author_info_table=author_info_table,
                                    publisher_info_table=publisher_info_table)
-    return render_template('generic.html',msg='access denied!')
+    return render_template('generic.html', msg='access denied!')
 
 
 # @app.route('/admin/statistics/view', methods= ['GET', 'POST'])
@@ -950,40 +950,8 @@ def detail(ISBN):
 
     info_table = ItemTable(info)
 
-    review_info = []
-    reviews = DB_Review.query.filter_by(ISBN=ISBN).all()
-
-    for review in reviews:
-        veryuseful = 0
-        useful = 0
-        useless = 0
-
-        comments = DB_Comment.query.filter_by(review_id = review.review_id).all()
-        for comment in comments:
-            if comment.usefulness =='very useful':
-                veryuseful +=1
-            if comment.usefulness == 'useful':
-                useful += 1
-            if comment.usefulness == 'useless':
-                useless +=1
-
-        if len(comments)!= 0:
-            usefulness = (veryuseful *2.0 + useful*1.0) /len(comments)
-        else:
-            usefulness = 0.0
-
-
-        review_info.append(ReviewItem(review.review_id,
-                                      review.username,
-                                      review.text,
-                                      review.score,
-                                      review.date,
-                                      usefulness))
-
-    review_info_table = ReviewTable(review_info)
-
     return render_template('detail.html', title=book.title, ISBN=ISBN,
-                           author=book.author, info_table=info_table, review_info_table=review_info_table)
+                           author=book.author, info_table=info_table)
 
 
 # ******************************* Review and Comment ***********************************
@@ -1018,6 +986,62 @@ def review():
     return redirect(url_for('detail', ISBN=ISBN))
 
 
+@app.route('/review_detail', methods=['GET', 'POST'])
+@flask_login.login_required
+def review_detail():
+
+    ISBN = request.form['ISBN']
+    n = request.form['number']
+    review_info = []
+    reviews = DB_Review.query.filter_by(ISBN=ISBN).all()
+
+
+    avg_score = {}
+    for review in reviews:
+        veryuseful = 0
+        useful = 0
+        useless = 0
+
+        comments = DB_Comment.query.filter_by(review_id=review.review_id).all()
+
+        for comment in comments:
+            if comment.usefulness == 'very useful':
+                veryuseful += 1
+            if comment.usefulness == 'useful':
+                useful += 1
+            if comment.usefulness == 'useless':
+                useless += 1
+
+        if len(comments) != 0:
+            usefulness = (veryuseful * 2.0 + useful * 1.0) / len(comments)
+        else:
+            usefulness = 0.0
+
+        avg_score[review]=usefulness
+
+
+    print(avg_score)
+    sorted_avg_score = sorted(avg_score,key = avg_score.get,reverse=True)
+    print(sorted_avg_score)
+    if n =='':
+        n = len(sorted_avg_score)
+    else:
+        n = int(n)
+    if len(sorted_avg_score) < n :
+        n=len(sorted_avg_score)
+    for i in range(n):
+
+        review_info.append(ReviewItem(sorted_avg_score[i].review_id,
+                                      sorted_avg_score[i].username,
+                                      sorted_avg_score[i].text,
+                                      sorted_avg_score[i].score,
+                                      sorted_avg_score[i].date,
+                                      avg_score[sorted_avg_score[i]]))
+
+    review_info_table = ReviewTable(review_info)
+    return render_template('review_detail.html',review_info_table=review_info_table,n=n)
+
+
 @app.route('/comment', methods=['GET', 'POST'])
 @flask_login.login_required
 def comment():
@@ -1037,7 +1061,6 @@ def post_comment():
     username = flask_login.current_user.id
     review_id = request.form['review_id']
     usefulness = request.form['usefulness']
-
 
     comment = DB_Comment.query.filter_by(username=username, review_id=review_id).first()
     if comment is not None:

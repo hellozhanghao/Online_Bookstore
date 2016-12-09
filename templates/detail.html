@@ -40,12 +40,23 @@
         </form>
         </div>
     </div>
-    <h2>Reviews by user</h2>
-        {{review_info_table}}
+
+
+    <h2>Show Reviews by user</h2>
+
+        <form action='/review_detail' method='POST'>
+                Review:
+                <input type="hidden" name="ISBN" value="{{ISBN}}"/>
+                <input type="number" name="number" id='number' placeholder="Number of useful review"/>
+
+                <input type='submit' name='submit' value="Get Review"/>
+        </form>
 
 
 
 
+
+    <h2>My review on {{title}}</h2>
         <form action='/review' method='POST'>
                 Review:
                 <input type="hidden" name="ISBN" value="{{ISBN}}"/>
@@ -54,6 +65,8 @@
 
                 <input type='submit' name='submit' value="Post Review"/>
         </form>
+
+
 
 </div>
 		<!-- Scripts -->
