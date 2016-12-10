@@ -26,61 +26,65 @@
         </div>
     </div>
 
-    <h2>Add to Cart</h2>
+
 
     <div id="main2">
         <div class="inner">
+             <h2>Add to Cart</h2>
         <form action='addtocart' method='POST'>
-            <div class="field half">
+            <div class="field half first">
                 Qty   :
                 <input type="hidden" name="ISBN" value="{{ISBN}}">
                 <input type='number' name='copy' id='copy' placeholder= 'Number of Copy'/>
+                </div>
+            <div class="field half">
                 <input type='submit' name='submit' value="Add To Cart"/>
             </div>
         </form>
-        </div>
-    </div>
 
-
-    <h2>User Reviews</h2>
-
-        <form action='/review_detail' method='POST'>
-                Show top
-                <input type="hidden" name="ISBN" value="{{ISBN}}"/>
-                <input type="number" name="number" id='number' placeholder="positive integer"/>
-                most useful reviews
-
-                <input type='submit' name='submit' value="Get Review"/>
+            <h2>User Reviews</h2>
+            <form action='/review_detail' method='POST'>
+                <div class="field half first">
+                    Show top
+                    <input type="hidden" name="ISBN" value="{{ISBN}}"/>
+                    <input type="number" name="number" id='number' placeholder="positive integer"/>
+                </div>
+                <div class="field half">
+                    most useful reviews
+                    <input type='submit' name='submit' value="Get Review"/>
+                </div>
         </form>
 
-
-
-
-    <h2>My review on {{title}}</h2>
-        <form action='/review' method='POST'>
-                Review:
-                <input type="hidden" name="ISBN" value="{{ISBN}}"/>
-                score:
-                <select name="score" id="score">
-                    <option value="10">10</option>
-                    <option value="9">9</option>
-                    <option value="8">8</option>
-                    <option value="7">7</option>
-                    <option value="6">6</option>
-                    <option value="5">5</option>
-                    <option value="4">4</option>
-                    <option value="3">3</option>
-                    <option value="2">2</option>
-                    <option value="1">1</option>
-                </select>
+            <h2>My review on {{title}}</h2>
+            <form action='/review' method='POST'>
+                <div class="field half first">
+                    Review:
+                    <input type="hidden" name="ISBN" value="{{ISBN}}"/>
+                    score:
+                    <select name="score" id="score">
+                        <option value="10">10</option>
+                        <option value="9">9</option>
+                        <option value="8">8</option>
+                        <option value="7">7</option>
+                        <option value="6">6</option>
+                        <option value="5">5</option>
+                        <option value="4">4</option>
+                        <option value="3">3</option>
+                        <option value="2">2</option>
+                        <option value="1">1</option>
+                    </select>
+                </div>
 
                 <!--<input type="number" name="score" id='score' placeholder="My Review Score"/>-->
-                <input type='text' name='review' id='review' placeholder= 'Anything you want to say about the book'/>
-
-
-                <input type='submit' name='submit' value="Post Review"/>
+                <div class="field half first">
+                    <input type='text' name='review' id='review' placeholder= 'Anything you want to say about the book'/>
+                </div>
+                <ul class="action">
+                    <input type='submit' name='submit' value="Post Review"/>
+                </ul>
         </form>
-
+        </div>
+    </div>
 
 
 </div>
