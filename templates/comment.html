@@ -5,21 +5,42 @@
     <title>Comment</title>
 </head>
 <body>
-        <h1>Comment</h1>
+<div id="wrapper">
+    <!-- Header -->
+					<header id="header">
+						<div class="inner">
 
+							<!-- Logo -->
+								<a href="/" class="logo">
+									<span class="symbol"><img src="../static/images/logo.svg" alt="" /></span><span class="title">Online Bookstore</span>
+								</a>
+						</div>
+					</header>
+    <div id="main">
+        <div class="inner">
+            <h1>Comment</h1>
         <p> I find this review of book {{book_title}} is  </p>
             <form action='comment/post' method='POST'>
                     <input type='hidden' name='ISBN' id='ISBN' value={{ISBN}}>
                     <input type='hidden' name='review_id' id='review_id' value={{review_id}}>
+                <div class="field half first">
                     <select name="usefulness" id="usefulness">
                         <option value="very useful">2-Very Useful</option>
                         <option value="useful">1-Useful</option>
                         <option value="useless">0-Useless</option>
-
                     </select>
+                </div>
+                <div class="field half">
                     <input type='submit' name='submit'>
+                </div>
             </form>
-
-
+        </div>
+    </div>
+</div>
+<!-- Scripts -->
+			<script src="/static/assets/js/jquery.min.js"></script>
+			<script src="/static/assets/js/skel.min.js"></script>
+			<script src="/static/assets/js/util.js"></script>
+			<script src="/static/assets/js/main.js"></script>
 </body>
 </html>
